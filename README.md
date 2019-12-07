@@ -1,4 +1,4 @@
-# NFL Time Series Modeling TO Predict Betting Lines
+# NFL Time Series Modeling to Predict Betting Lines
 
 If only we could predict the future of any future sporting event... We could be rich!
 ![Greys Sports Almanac](./almanac.jpg)
