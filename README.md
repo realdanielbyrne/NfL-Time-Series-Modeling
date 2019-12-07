@@ -30,6 +30,8 @@ Traditional methods rely on moving averages
 
 Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  However, they are wrong 45 - 47% of the time.
 
+![Dak's Stats](./dakstats.png)
+
 ## Cyclical patterns in Human Performance
 
 ![Dak's Completion % 2018-20180](./dakcmp.png)
@@ -38,6 +40,5 @@ Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc
 - Good players have a higher mean than average players
 - When all players on a team have a good game, that can raise the expectation of the team winning
 
-![Zeke's Rushing Yards in 2019](./Zeke_rypg.png)
 
 
