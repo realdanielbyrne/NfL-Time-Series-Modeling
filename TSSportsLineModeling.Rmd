@@ -66,6 +66,11 @@ par(old.par)
 
 If we consider the individual seasons of a players or a teams performance as differet realizations of the underlying stationary process then we can also model this process in an attempt to predict the performances game to game. 
 
+```{r}
+daldf = getTeamData()
+plotts.sample.wge(daldf$score)
+```
+
 
 ## Theory
 

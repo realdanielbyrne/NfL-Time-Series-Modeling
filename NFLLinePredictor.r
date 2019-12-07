@@ -15,18 +15,54 @@ require("plyr")
 require("vars")
 require("GGally")
 
-# Temporary Key (get your free trial key at)
+
+# Documentation at
+# https://github.com/realdanielbyrne/NfL-Time-Series-Modeling
+#
+# Quick Start :
+#
+# Register for a t day free trial to profootballapi to receive an API key
+# https://profootballapi.com/signup
+#
+# Source this file and execute getPredictions() on the r command line
+#
+##  getPredictions('DAL','CHI', 2019)
+
+# Run all models against a potential nfl matchup 
+# Return predictions for score, line, and over/under 
+#
+# Parameters:
+#   team1, team2 - 2 or 3 letter team abbreviation
+#   year = The year of interest
+#
+getPredictions = function(team1 ='DAL', team2 = 'CHI', year = 2019) 
+{
+  teams = getMatchupData(team1,team2,year)
+  am = arima_model(teams,team1,team2)
+  vm = var_model(teams,team1,team2)
+  mm = mlp_model(teams,team1,team2)
+  em = ensemble_model(am,vm,mm,team1,team2)
+  lines = rbind(am,vm,mm,em)
+  return(lines)
+}
+
+
+# Retrieves API Get
+# Get a temporary Key at https://profootballapi.com/signup
+#
 getApiKey <- function() {
   api_key = "D15KXhxEp7uqUJesQL29ZioPA6aYjgb0"  # replace with your API key
   return (api_key)
 }
 
-# Returns base API url
+# Returns the base API url
+#
 getUri <- function() {
   uri = 'https://profootballapi.com/'
   return (uri)
 }
 
+# Team Stats API Call.  Documentation at the following link:
 # https://profootballapi.com/docs/teams
 getTeamStats <- function(team='dal', year) 
 {
@@ -43,6 +79,7 @@ getTeamStats <- function(team='dal', year)
   return (request(url,query))
 }
 
+# NFL Schedule Stats API Call.  Documentation at the following link:
 # https://profootballapi.com/docs/schedule
 getScheduleStats <- function(year)
 {
@@ -59,6 +96,7 @@ getScheduleStats <- function(year)
   return (request(url,query))
 }
 
+# Player Stats API Call. Documentation at the following link:
 # https://profootballapi.com/docs/players
 getPlayerStats <- function(player_name='', stats_type = 'passing', year = '') 
 {
@@ -68,7 +106,11 @@ getPlayerStats <- function(player_name='', stats_type = 'passing', year = '')
   return (request(url,query))
 }
 
-# Base api request
+# Base api request 
+# Initiates and retrieves API calls
+# Called from higher level API functions such as getPlayerStats
+# Do not call directly.
+#
 request <- function(url,query)
 {
   resp = POST(url, query = query)
@@ -79,6 +121,8 @@ request <- function(url,query)
 
 # Combines Schedule statistics with Team Statistics 
 # Removes columns with little or no value
+# Called from getTeamData
+# Do not call directly
 combineScheduleWithStats <- function(sched, teamStats, team) 
 {
   teamStats$id = teamStats$nfl_game_id
@@ -95,6 +139,11 @@ combineScheduleWithStats <- function(sched, teamStats, team)
 }
 
 # Get Teams Stats 
+# Retrieve teams stats and schedule information from API
+# Parameters 
+#   team - 2 or 3 letter team abbreviation
+#   year - season
+#
 getTeamData <- function(team = 'DAL', year = 2019)
 {
   lastYear = year-1
@@ -115,7 +164,11 @@ getTeamData <- function(team = 'DAL', year = 2019)
   return (all)
 }
 
-# Gets complete stats for both teams
+# Gets complete stats for a matchup
+# Parameters 
+#   team1, team2 - 2 or 3 letter team abbreviation
+#   year - season
+#
 getMatchupData <- function(team1 = 'DAL', team2 = 'CHI', year = 2019)
 {
   t1data = getTeamData(team1, year)
@@ -256,6 +309,9 @@ var_model= function(teams,team1,team2)
   return(df)
 }
 
+# Builds "an ensemble model for both teams
+# Models score as a predictor for team performance
+# Returns the model predictions for each team, the difference,the sum and the ASE
 ensemble_model= function(am,vm,mm,team1,team2)
 {
   ensemblet1 = (am$team1prediction + vm$team1prediction + mm$team1prediction) / 3
@@ -276,17 +332,6 @@ ensemble_model= function(am,vm,mm,team1,team2)
   return (em)
 }
 
-# Run all models and produce predictions for score, line, and over/under 
-getPredictions = function(team1 ='DAL', team2 = 'CHI', year = 2019) 
-{
-  teams = getMatchupData(team1,team2,year)
-  am = arima_model(teams,team1,team2)
-  vm = var_model(teams,team1,team2)
-  mm = mlp_model(teams,team1,team2)
-  em = ensemble_model(am,vm,mm,team1,team2)
-  lines = rbind(am,vm,mm,em)
-  return(lines)
-}
 
   
 
