@@ -35,5 +35,4 @@ Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc
 
 - The wandering and cyclic behaviors evident in stats are a mirror into real life
 - Good players have a higher mean than average players
-- Combinations of players all having a good game can raise the expectation of the team winning that game
-Different seasons can be considered different realizations
+- When all players on a team have a good game, that can raise the expectation of the team winning
