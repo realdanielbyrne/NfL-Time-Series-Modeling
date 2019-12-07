@@ -32,6 +32,12 @@ Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc
 
 ## Cyclical patterns in Human Performance
 
+![Dak's Completion % 2018-20180(./dakcmp.png)
+
 - The wandering and cyclic behaviors evident in stats are a mirror into real life
 - Good players have a higher mean than average players
 - When all players on a team have a good game, that can raise the expectation of the team winning
+
+![Zeke's Rushing Yards in 2019](./Zeke_rypg.png)
+
+
