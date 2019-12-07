@@ -40,5 +40,15 @@ Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc
 - Good players have a higher mean than average players
 - When all players on a team have a good game, that can raise the expectation of the team winning
 
+## Stationary Time Series
+
+Stats resemble stationary time series.
+
+- Mean and variance do not dependent on time
+- Correlation of two points `t1 and t2` depends only on how far apart and not where they are in the time series.
+
+Thus the conditions of stationarity are generally met.
+
+![Dallas Cowboys Score 2018-2018](./dalgamescores.png)
 
 
