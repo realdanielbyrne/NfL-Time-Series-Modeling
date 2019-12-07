@@ -31,7 +31,7 @@ Traditional methods rely on moving averages
 
 Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  However, they are wrong 45 - 47% of the time.
 
-## Cyclical patterns in human performance
+## Cyclical patterns in Human Performance
 
 - The wandering and cyclic behaviors evident in stats are a mirror into real life
 - Good players have a higher mean than average players
