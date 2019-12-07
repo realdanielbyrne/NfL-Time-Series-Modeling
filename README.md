@@ -49,6 +49,6 @@ Stats resemble stationary time series.
 
 Thus the conditions of stationarity are generally met.
 
-![Dallas Cowboys Score 2018-2018](./dalgamescores.png)
+![Dallas Cowboys Score 2018-2018](./dalgamscores.png)
 
 
