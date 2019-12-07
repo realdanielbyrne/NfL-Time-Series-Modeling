@@ -19,31 +19,37 @@ library(knitr)
 
 source('./NFLLinePredictor.r')
 ```
-
-## Introduction
+# NFL Time Series Modeling to Predict Betting Lines
 
 If only we could predict the future of any future sporting event... We could be rich!
-
-
 ![Greys Sports Almanac](./almanac.jpg)
 
+## Quick Start :
 
-Professional sports bettors win/loss records can be thought of as a stationary process which centers around a mean indpendent of time.  
+ Register for a 7 day free trial to (Pro Football API)[https://profootballapi.com/signup] to receive an API key.
 
-- Professional gamblers make on average about $93,000 a year all the while incuring risks of serious financial loss.  
+
+ Source this file and execute getPredictions('DAL','CHI') on the r command line
+
+    getPredictions('DAL','CHI', 2019)
+
+
+## Motivation
+
+- To Win!
 - Gamblers on average win between 53% and 55% of the time.
-- Even a 1% increase in winnings can equte to thousands of dollars in income.
+- Bettors make ~$93,000 a year
 
-## Cyclical Patterns And Means
+Even a +1%  can mean yield money depending on bets made and amount wagered.  
 
-- There is a natural ebb and flow pattern to many stats modeling human performance.
-  - Win Loss Records
-  - Completion Percentage
-  - Yards per Game
+## Traditional Sports Modeling
 
-- Dak Prescott's season completion percetages in 2016, 2018, and 2019 iare within +/-1% of his career average.
-- Indicating over 16+ games a season, there is still an underlying mean in the time series process dictating its behavior.
-- This fact has driven statiticians to rely on the highly predictible linear time invariant models to predict game performance.
+Traditional methods rely on moving averages
+
+- Dak Prescott’s season completion% in 2016, 2018, and 2019 are within +/-1% of his career average.
+- Players and Teams tend to revert to their mean
+
+Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  However, they are wrong 45 - 47% of the time.
 
 ```{r}
 
@@ -61,6 +67,8 @@ plot(1:length(cp),cp,main="Dak's 2018-19 Completion %", type="l")
 plot(2016:2019,scp,main="Dak's Season Avg Completion %", type="l")
 par(old.par)
 ```
+
+![Zeke's Rushing Yards Per Game 2019](Zeke_rypg.png)
 
 ## Time Series Analysis
 
