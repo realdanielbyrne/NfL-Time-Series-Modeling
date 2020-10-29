@@ -13,7 +13,7 @@ Threfore, it is entirely consistent and reasonable to base predictions on that e
 to conclude that this low pass filtering of what is a time series, is inconsistent and generally wrong when you consider a point in time value.
 
 Vegas will adjust for these point in time consideration through feature engineering.  They will make modifications to their predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  For instance it is common to give the home team 3 points.
-However, they are still wrong 45 - 47% of the time.
+However, the Vegas odds makers are still wrong 45 - 47% of the time on average.
 
 I propose a time series differencing approach to modeling team performances based upon their natural cycles, and then using these predictions in comparison with their opponents' similar predictions.  I then take these two predictions and difference them come up with a prediction for who will win the contest.
 
