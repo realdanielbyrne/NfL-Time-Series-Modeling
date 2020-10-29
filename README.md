@@ -4,12 +4,22 @@ If only we could predict the future of any future sporting event... We could be 
 
 ![Greys Sports Almanac](./almanac.jpg)
 
-## Quick Start
+## Abstract
 
-1. Register for a 7 day free trial to (Pro Football API)[https://profootballapi.com/signup] to receive an API key.
-2. Source this file and execute getPredictions('DAL','CHI') on the r command line
+Traditional Sports Modeling methods rely on moving or long term averages.
+For instance Dak Prescott’s season completion% in 2016, 2018, and 2019 are within +/-1% of his career average.
+It is generally considered a statistical fact that natural processes tend to revert to their means.
+Threfore, it is entirely consistent and reasonable to base predictions on that expectation.  However it is also reasonable
+to conclude that this low pass filtering of what is a time series, is inconsistent and generally wrong when you consider a point in time value.
 
-    getPredictions('DAL','CHI', 2019)
+Vegas will adjust for these point in time consideration through feature engineering.  They will make modifications to their predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  For instance it is common to give the home team 3 points.
+However, they are still wrong 45 - 47% of the time.
+
+I propose a time series differencing approach to modeling team performances based upon their natural cycles, and then using these predictions in comparison with their opponents' similar predictions.  I then take these two predictions and difference them come up with a prediction for who will win the contest.
+
+In this research I used an upcoming game, the matchup between my hometown Dallas Cowboys and the Chicago Bears in Week 14 of the 2019 season. 
+I compared the Vegas lines, which use traditional linear mean analysis, with my time series difference approach, before and after the game was played.
+Each of the 4 models I proposed would have won the Money Line, the Over/Under and the Spread bets for the game. Whereas the Vegas predictions were wrong on all 3 accounts.
 
 
 ## Motivation
@@ -206,3 +216,12 @@ other teammates who could potentially be on the upswing that day.  Likewise on d
 
 There is a lot of potential to this type of analysis, all over sport, outside of betting, and future researchers should take advantage of the possibilities 
 exposed by this research.
+
+
+
+## Quick Start to Running the Models
+
+1. Register for a 7 day free trial to (Pro Football API)[https://profootballapi.com/signup] to receive an API key.
+2. Source this file and execute getPredictions('DAL','CHI') on the r command line
+
+    getPredictions('DAL','CHI', 2019)
