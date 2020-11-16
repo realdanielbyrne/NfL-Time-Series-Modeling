@@ -51,7 +51,7 @@ getPredictions = function(team1 ='DAL', team2 = 'CHI', year = 2019)
 # Get a temporary Key at https://profootballapi.com/signup
 #
 getApiKey <- function() {
-  api_key = "D15KXhxEp7uqUJesQL29ZioPA6aYjgb0"  # replace with your API key
+  api_key = "URoTfv9D8Y7xce3CkdEPASpuOzlsNqjH"  # replace with your API key
   return (api_key)
 }
 
@@ -180,13 +180,64 @@ getMatchupData <- function(team1 = 'DAL', team2 = 'CHI', year = 2019)
 # Builds MLP model for both teams.
 # Models score as a predictor for team performance
 # Returns the model predictions for each team, the difference,the sum and the ASE
-mlp_model <- function(teams, team1,team2,autolag = FALSE)
+mlp_model <- function(teams, team1, team2,autolag = TRUE, predictAgainstActual = FALSE)
 {
 
+  # Build and Predict
+  
+  for (i in 1:2)
+  {
+    t = teams[[i]]
+    score = t$score
+
+    if (predictAgainstActual) 
+    {
+      l = length(score) - 1 
+    }
+    else
+    {
+      l = length(score)  
+    }
+    
+    score_ts = ts(score1[1:l])
+    t_2 = t[1:l,]
+    
+    t1xregs = data.frame(totyds = ts(t1_2$totyds), 
+                         trnovr = ts(t1_2$trnovr), 
+                         penyds = ts(t1_2$penyds),
+                         ptyds  = ts(t1_2$ptyds))
+
+    rlag = 2
+    
+    if (autolag) {
+      team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(rlag,rlag,rlag,rlag))
+    }
+
+    else {
+      lags = 1:3
+      team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(rlag,rlag,rlag,rlag), lags = lags)
+    }
+    #print(team1_fit)
+    
+    t1_totyds = append(t1$totyds,0)
+    t1_trnovr = append(t1$trnovr,0)
+    t1_penyds = append(t1$penyds,0)
+    t1_ptyds = append(t1$ptyds,0)
+    
+    t1xregs = data.frame(totyds = ts(t1_totyds), 
+                         trnovr = ts(t1_trnovr), 
+                         penyds = ts(t1_penyds),
+                         ptyds  = ts(t1_ptyds))
+    
+    f1 = forecast(team1_fit, h = 1, xreg = t1xregs)
+    ASE1 = mean((score1[l:l+1] - f1$mean) ^ 2)
+  
+  }
+  
   # Team 1 model
   t1 = teams[[1]]
   score1 = t1$score
-  l = length(t1$score)-1 
+  l = length(t1$score)#-1 
   score_ts1 = ts(score1[1:l])
   t1_2 = t1[1:l,]
   
@@ -194,18 +245,27 @@ mlp_model <- function(teams, team1,team2,autolag = FALSE)
                        trnovr = ts(t1_2$trnovr), 
                        penyds = ts(t1_2$penyds),
                        ptyds  = ts(t1_2$ptyds))
+   
+  rlag = 2
+  
   if (autolag) {
-    team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(1,1,1,1))
+    team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(rlag,rlag,rlag,rlag))
   }
   else {
-    team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(1,1,1,1), lags = 1)
+    lag = 1
+    team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(rlag,rlag,rlag,rlag), lags = lag)
   }
   #print(team1_fit)
   
-  t1xregs = data.frame(totyds = ts(t1$totyds), 
-                       trnovr = ts(t1$trnovr), 
-                       penyds = ts(t1$penyds),
-                       ptyds  = ts(t1$ptyds))
+  t1_totyds = append(t1$totyds,0)
+  t1_trnovr = append(t1$trnovr,0)
+  t1_penyds = append(t1$penyds,0)
+  t1_ptyds  = append(t1$ptyds,0)
+  
+  t1xregs = data.frame(totyds = ts(t1_totyds), 
+                       trnovr = ts(t1_trnovr), 
+                       penyds = ts(t1_penyds),
+                       ptyds  = ts(t1_ptyds))
   
   f1 = forecast(team1_fit, h = 1, xreg = t1xregs)
   ASE1 = mean((score1[l:l+1] - f1$mean) ^ 2)
@@ -214,9 +274,10 @@ mlp_model <- function(teams, team1,team2,autolag = FALSE)
   # Team 2 Model
   t2 = teams[[2]]
   score2 = t2$score
-  l = length(t2$score)-1 
+  l = length(t2$score)#-1 
   score_ts2 = ts(score2[1:l])
   t2_2 = t2[1:l,]
+  
   
   t2xregs = data.frame(totyds = ts(t2_2$totyds), 
                        trnovr = ts(t2_2$trnovr), 
@@ -231,10 +292,15 @@ mlp_model <- function(teams, team1,team2,autolag = FALSE)
   }
   #print(team2_fit)
   
-  t2xregs = data.frame(totyds = ts(t2$totyds), 
-                       trnovr = ts(t2$trnovr), 
-                       penyds = ts(t2$penyds),
-                       ptyds  = ts(t2$ptyds))
+  t2_totyds = append(t2$totyds,0)
+  t2_trnovr = append(t2$trnovr,0)
+  t2_penyds = append(t2$penyds,0)
+  t2_ptyds = append(t2$ptyds,0)
+  
+  t2xregs = data.frame(totyds = ts(t2_totyds), 
+                       trnovr = ts(t2_trnovr), 
+                       penyds = ts(t2_penyds),
+                       ptyds  = ts(t2_ptyds))
   
   f2 = forecast(team2_fit, h = 1, xreg = t2xregs)
   ASE2 = mean((score2[l:l+1] - f2$mean) ^ 2)
@@ -252,7 +318,7 @@ arima_model <- function(teams, team1,team2,teamnames)
 {
   # Team 1
   t1 = teams[[1]]
-  l = length(t1) - 1
+  l = length(t1) #- 1
   t1_2 = t1[1:l,]
 
   ksfit = lm(score ~ ptyds + trnovr + totyds + penyds + ptyds1 + trnovr1 + totyds1 + penyds1 , data = t1_2)
@@ -288,7 +354,7 @@ var_model= function(teams,team1,team2)
 {
   t1 = teams[[1]]
   t2 = teams[[2]]
-  l = length(t1) - 1
+  l = length(t1) #- 1
 
   t1_2 = t1[1:l,]
   t2_2 = t2[1:l,]
