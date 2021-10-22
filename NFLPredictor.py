@@ -8,7 +8,8 @@ import warnings
 import argparse
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
-
+import statsmodels.api as sm
+from patsy import dmatrices
 from darts import TimeSeries
 from darts.metrics import mape, smape, mase
 from darts.dataprocessing.transformers import Scaler
@@ -16,8 +17,7 @@ from darts.utils.likelihood_models import GaussianLikelihood
 from darts.models import (
     ExponentialSmoothing,
     AutoARIMA,
-    RegressionModel,
-    RegressionEnsembleModel,
+    RegressionModel,    
     RandomForest,
     FFT,
     NBEATSModel,
@@ -26,13 +26,30 @@ from darts.models import (
     TransformerModel,
     BlockRNNModel
 )
-from  darts.models import LightGBMModel
-
+import warnings
+warnings.filterwarnings("ignore")
 import logging
-logging.basicConfig(level=logging.ERROR)
+logging.disable(logging.CRITICAL)
 
 
 baseurl = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
+
+def getMatchupData (team1 = 'dal', 
+                    team2 = 'phi', 
+                    years = ['2018','2019','2020','2021'], 
+                    add_mean = True, 
+                    target_col='TeamScore',
+                    covs = None):
+    
+    t1stats = getTeamGameStats(team1, years)
+    t2stats = getTeamGameStats(team2, years)
+
+    t1_ts = get_ts_data(t1stats, add_mean, target_col)
+    t2_ts = get_ts_data(t2stats, add_mean, target_col)
+
+    teams = t1_ts, t2_ts
+    return teams
+
 def getTeamGameStats  (team='dal',years=['2018','2019','2020','2021']):
  
     stats = pd.DataFrame()
@@ -54,11 +71,11 @@ def getTeamGameStats  (team='dal',years=['2018','2019','2020','2021']):
 
     stats['OT'] = np.where((stats['OT']=='OT'), 1, 0)
     stats['@'] = np.where((stats['@']=='@'), 1, 0)
+    stats['W/L'] = np.where((stats['W/L']=='W'), 1, 0)
 
     stats['Def_TO'] = stats['Def_TO'].fillna(0)
-    stats['Off_TO'] = stats['Off_TO'] .fillna(0)
+    stats['Off_TO'] = stats['Off_TO'].fillna(0)
     
-    stats = stats.astype({'Off_TO':np.float32,'Def_TO':np.float32,'OT':np.float32,'@':np.float32})
 
     stats.index = pd.RangeIndex(len(stats.index))
     stats.index = range(len(stats.index))  
@@ -67,18 +84,7 @@ def getTeamGameStats  (team='dal',years=['2018','2019','2020','2021']):
 
     return stats
 
-def getMatchupData (team1 = 'dal', team2 = 'phi', years=['2019','2020','2021'], add_mean = True, target_col='TeamScore'):
-    
-    t1stats = getTeamGameStats(team1, years)
-    t2stats = getTeamGameStats(team2, years)
-
-    t1_ts = get_ts_data(t1stats, add_mean, target_col)
-    t2_ts = get_ts_data(t2stats, add_mean, target_col)
-
-    teams = t1_ts, t2_ts
-    return teams
-
-def get_ts_data(teamdata, add_mean = True, target_col = 'TeamScore'):
+def get_ts_data(teamdata, add_mean = True, target_col = 'TeamScore', covs = None):
 
     # Split target and covariates     
     target = teamdata[target_col]
@@ -87,10 +93,11 @@ def get_ts_data(teamdata, add_mean = True, target_col = 'TeamScore'):
     #     'Def_1stDn', 'Def_Totyd', 'Def_PassYd', 'Def_RushYd','@']]
 
     covs = teamdata[[
-        'Off_1stDn', 'Off_Totyd', 'Off_PassYd', 'Off_RushYd','TeamScore',
-        'Def_1stDn', 'Def_Totyd', 'Def_PassYd', 'Def_RushYd']]
-
+        'Off_1stDn', 'Off_Totyd', 'Off_PassYd', 'Off_RushYd','TeamScore','OT','@',
+        'Def_1stDn', 'Def_Totyd', 'Def_PassYd', 'Def_RushYd','Def_TO']]
+    covs = covs.astype(np.float32)
     covs = covs.drop(target_col, axis = 1)
+
     # Adds a simulated sample to build look ahead models
     if add_mean:
         mu = covs.mean(axis=0)
@@ -201,10 +208,7 @@ def exp_model(t1data, t2data, team1, team2):
     p2 = model2.predict(1).first_value()
 
     pred = get_prediction(p1, p2, team1, team2, "ExponentialSmoothing")
-    print(pred)   
     return pred
-
-
 
 def brnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
       
@@ -224,7 +228,6 @@ def brnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     p1 = scale1.inverse_transform(p[0]).first_value()
     p2 = scale2.inverse_transform(p[1]).first_value()
     pred = get_prediction(p1, p2, team1, team2, "BlockRNNModel")
-    print(pred)
 
     return pred
 
@@ -253,7 +256,6 @@ def rnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     p1 = scale1.inverse_transform(p[0]).first_value()
     p2 = scale2.inverse_transform(p[1]).first_value()
     pred = get_prediction(p1, p2, team1, team2, "RNNModel")
-    print(pred)
 
     return pred
 
@@ -271,36 +273,21 @@ def fft_model(train1,train2,scale1,scale2,team1,team2):
     p2 = scale2.inverse_transform(p2).first_value()
 
     pred = get_prediction(p1, p2, team1, team2, "FFT")
-    print(pred)
-
-    return pred
-
-def beats_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2, scale = True):
-    beatsmodel = NBEATSModel(
-        input_chunk_length=8,
-        output_chunk_length=1, 
-        generic_architecture=True,
-        n_epochs=100)
-    
-    beatsmodel.fit([train1,train2],past_covariates = [cov1,cov2],verbose = True)
-    p = beatsmodel.predict(1, series = [train1,train2], past_covariates = [cov1,cov2])
-    p1 = scale1.inverse_transform(p[0]).first_value()
-    p2 = scale2.inverse_transform(p[1]).first_value()
-    pred = get_prediction(p1, p2,team1, team2, "NBEATSModel")
-    print(pred)
 
     return pred
 
 def tcn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     deeptcn = TCNModel(
         dropout=0.2,
-        batch_size=24,
-        n_epochs=300,
+        batch_size=32,
+        n_epochs=400,
         optimizer_kwargs={'lr': 1e-3}, 
+        dilation_base=2,
+        num_layers = 2,
         random_state=0,
-        input_chunk_length=8,
+        input_chunk_length=6,
         output_chunk_length=1,
-        kernel_size=6,
+        kernel_size=4,
         model_name= "tcn_model",
         num_filters=6,
         likelihood=GaussianLikelihood(),
@@ -316,16 +303,58 @@ def tcn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     p2 = scale2.inverse_transform(p[1]).first_value()
 
     pred = get_prediction(p1, p2, team1, team2, "TCNModel") 
-    print(pred)   
+
     return pred
 
-def transformer_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
+def beats_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2, scale = True):
+
+    beatsmodel = NBEATSModel(
+        layer_widths = 300,
+        input_chunk_length = 8,
+        output_chunk_length = 1, 
+        num_blocks = 3,
+        generic_architecture = False,
+        force_reset = True,
+        nr_epochs_val_period = 5,
+        n_epochs = 200)
     
+    beatsmodel.fit( series = [train1, train2], 
+                    past_covariates = [cov1, cov2], 
+                    verbose = True)
+
+    p = beatsmodel.predict(1, series = [train1, train2], past_covariates = [cov1,cov2])
+    p1 = scale1.inverse_transform(p[0]).first_value()
+    p2 = scale2.inverse_transform(p[1]).first_value()
+    pred = get_prediction(p1, p2,team1, team2, "NBEATSModel")
+
+    return pred
+ 
+def beats_model_generic(train1,train2,cov1,cov2,scale1,scale2,team1,team2, scale = True):
+    beatsmodel = NBEATSModel(
+        layer_widths=300,
+        input_chunk_length=8,
+        output_chunk_length=1, 
+        generic_architecture=True,
+        num_blocks = 3,
+        num_layers = 4,
+        num_stacks = 5,        
+        force_reset = True,
+        n_epochs=200)
+    
+    beatsmodel.fit([train1,train2],past_covariates = [cov1,cov2],verbose = True)
+    p = beatsmodel.predict(1, series = [train1,train2], past_covariates = [cov1,cov2])
+    p1 = scale1.inverse_transform(p[0]).first_value()
+    p2 = scale2.inverse_transform(p[1]).first_value()
+    pred = get_prediction(p1, p2,team1, team2, "NBEATS Generic")
+
+    return pred   
+
+def transformer_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):    
     trans_model = TransformerModel(
         input_chunk_length = 8,
         output_chunk_length = 1,
         batch_size = 32,
-        n_epochs = 100,
+        n_epochs = 200,
         model_name = 'transformer',    
         d_model = 16,
         nhead = 4,
@@ -339,12 +368,11 @@ def transformer_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
         log_tensorboard = True
     )
 
-    trans_model.fit(series=[train1,train2], past_covariates = [cov1,cov2], verbose=True)
-    p = trans_model.predict(1, series=[train1,train2], past_covariates = [cov1,cov2])
+    trans_model.fit(series=[train1, train2], past_covariates = [cov1, cov2], verbose=True)
+    p = trans_model.predict(1, series=[train1, train2], past_covariates = [cov1, cov2])
     p1 = scale1.inverse_transform(p[0]).first_value()
     p2 = scale2.inverse_transform(p[1]).first_value()
-    pred = get_prediction(p1, p2, team1, team2, "TransformerModel") 
-    print(pred)   
+    pred = get_prediction(p1, p2, team1, team2, "TransformerModel")     
 
     return pred
 
@@ -356,31 +384,28 @@ def randomforest_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     p = randf_model.predict(1, series=[train1,train2], past_covariates = [cov1,cov2])
     p1 = scale1.inverse_transform(p[0]).first_value()
     p2 = scale2.inverse_transform(p[1]).first_value()
-    pred = get_prediction(p1, p2, team1, team2, "RandomForest") 
-    print(pred)   
+    pred = get_prediction(p1, p2, team1, team2, "RandomForest")     
 
     return pred
 
 def regression_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2):
     
-    regression_model = RegressionModel(lags=[-1,-2,-3],lags_past_covariates=[-1,-2,-3])
+    regression_model = RegressionModel(lags=[-1,-2,-3,-4],lags_past_covariates=[-1,-2,-3,-4])
 
     regression_model.fit(series=[train1,train2], past_covariates = [cov1,cov2])
     p = regression_model.predict(1, series=[train1,train2], past_covariates = [cov1,cov2])
     p1 = scale1.inverse_transform(p[0]).first_value()
     p2 = scale2.inverse_transform(p[1]).first_value()
     pred = get_prediction(p1, p2, team1, team2, "Regression") 
-    print(pred)   
 
     return pred
 
-
 def ensemble_model(preds):
     preds_df = pd.DataFrame(preds)
-    
-    mu = preds_df.mean(axis=0)
+    mu = round(preds_df.mean(axis=0),0)
     mu['model'] = 'mu'
     preds_df = preds_df.append(mu,ignore_index=True)
+
     return preds_df
 
 def split_and_scale_data(t1data,t2data):
@@ -407,41 +432,71 @@ if __name__ == "__main__":
     # Parameters
     parser = get_parser()
     args = parser.parse_args("")
-    team1 = 'dal'
-    team2 = 'nyg'
-    target_col = 'TeamScore'
-    years=['2018','2019','2020','2021']
+    teams = []
     
+    #teams.append(['gnb','was'])
+    #teams.append(['kan','oti'])
+    #teams.append(['atl','mia'])
+    teams.append(['nwe','nyj'])
+    #teams.append(['car','nyg'])
+    #teams.append(['rav','cin'])
+    #teams.append(['rai','phi'])
+    #teams.append(['ram','det'])
+    #teams.append(['crd','htx'])
+    #teams.append(['tam','chi'])
+    #teams.append(['sfo','clt'])
+    target_col = 'TeamScore'
+    years=['2018','2019','2020','2021'] 
+    
+    matchups = {}
     # Get Data
-    add_mean = True
-    t1data, t2data = getMatchupData(team1, team2, years, add_mean, target_col)
-    train1, train2, cov1, cov2, scale1, scale2 = split_and_scale_data(t1data, t2data)
+    for t in teams:
+        team1 = t[0]
+        team2 = t[1]
+        add_mean = True
+        t1data, t2data = getMatchupData(team1, team2, years, add_mean, target_col)
+        train1, train2, cov1, cov2, scale1, scale2 = split_and_scale_data(t1data, t2data)
 
-    # Plot
-    # t1data['target'].plot(label=team1)
-    # t2data['target'].plot(label=team2)
-    # plt.ylabel(target_col)
-    # plt.show()
+        # Plot
+        # t1data['target'].plot(label=team1)
+        # t2data['target'].plot(label=team2)
+        # plt.ylabel(target_col)
+        # plt.show()
 
-    # t1data['target'][-5:].plot(label=team1)
-    # t2data['target'][-5:].plot(label=team2)
-    # plt.ylabel(target_col)
-    # plt.show()
+        # t1data['target'][-5:].plot(label=team1)
+        # t2data['target'][-5:].plot(label=team2)
+        # plt.ylabel(target_col)
+        # plt.show()
 
-    # Predict
-    preds = []
-    preds.append (arima_model(t1data, t2data, team1, team2))
-    preds.append (fft_model(train1,train2,scale1,scale2,team1,team2))
-    preds.append (randomforest_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (exp_model(t1data, t2data, team1, team2))
-    preds.append (brnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (regression_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (rnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (beats_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (tcn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-    preds.append (transformer_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
-
-    # print results
-    preds_df = ensemble_model(preds)
-    preds_df = preds_df.loc[preds_df["model"] !="Transformer Model" ]
-    print(preds_df)
+        # Predict
+        preds = []
+        preds.append (arima_model(t1data, t2data, team1, team2))
+        preds.append (fft_model(train1,train2,scale1,scale2,team1,team2))
+        preds.append (randomforest_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
+        preds.append (exp_model(t1data, t2data, team1, team2))
+        preds.append (brnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
+        preds.append (regression_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
+        preds.append (rnn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))        
+        preds.append (tcn_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
+        preds.append (beats_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))
+        preds.append (beats_model_generic(train1,train2,cov1,cov2,scale1,scale2,team1,team2))        
+        preds.append (transformer_model(train1,train2,cov1,cov2,scale1,scale2,team1,team2))        
+        preds_df = ensemble_model(preds)
+        
+        # plot regression
+        matchup = "{} ~ {}".format(team1,team2)
+        # y, X = dmatrices(matchup, data=preds_df, return_type='dataframe')
+        # mod = sm.OLS(y, X)    # Describe model
+        # res = mod.fit()       # Fit model        
+        
+        # fig, ax = plt.subplots(figsize=(8, 6))
+        # ax.plot(X[team2], y, "o", label="data")
+        # ax.plot(X[team2], res.fittedvalues, "r--.", label="OLS")
+        # ax.legend(loc="best")
+        # ax.set_xlabel(team1)
+        # ax.set_ylabel(team2)
+        # plt.show()        
+        matchups[matchup]=preds
+        print(preds_df)
+        
+    
