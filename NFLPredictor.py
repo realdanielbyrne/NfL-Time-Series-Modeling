@@ -434,17 +434,13 @@ if __name__ == "__main__":
     args = parser.parse_args("")
     teams = []
     
-    #teams.append(['gnb','was'])
-    #teams.append(['kan','oti'])
-    #teams.append(['atl','mia'])
-    teams.append(['nwe','nyj'])
-    #teams.append(['car','nyg'])
-    #teams.append(['rav','cin'])
-    #teams.append(['rai','phi'])
-    #teams.append(['ram','det'])
-    #teams.append(['crd','htx'])
-    #teams.append(['tam','chi'])
-    #teams.append(['sfo','clt'])
+    #teams.append(['atl','nor'])
+    #teams.append(['den','dal'])
+    #teams.append(['htx','mia'])
+    #teams.append(['min','rav'])
+    #teams.append(['cle','cin'])
+    teams.append(['kan','gnb'])
+
     target_col = 'TeamScore'
     years=['2018','2019','2020','2021'] 
     
