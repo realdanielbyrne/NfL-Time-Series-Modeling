@@ -1,0 +1,62 @@
+Week,Day,Date,Time,BoxScore,W/L,OT,Record,@,Opponent,TeamScore,OpponentScore,Off_1stDn,Off_Totyd,Off_PassYd,Off_RushYd,Off_TO,Def_1stDn,Def_Totyd,Def_PassYd,Def_RushYd,Def_TO,ExpOff,ExpDef,ExpSpTeams,year,Team,month,day,Timestamp_str,Timestamp
+1,Sun,September 9,1:00PM ET,boxscore,1,0,1-0,0,Buffalo Bills,47.0,3.0,26.0,369.0,252.0,117.0,1.0,10.0,153.0,70.0,83.0,2.0,7.23,28.71,2.33,2018,rav,September,9,2018/September/9,2018-09-09
+2,Thu,September 13,8:20PM ET,boxscore,0,0,1-1,1,Cincinnati Bengals,23.0,34.0,28.0,425.0,359.0,66.0,3.0,24.0,373.0,265.0,108.0,0.0,2.72,-12.8,1.12,2018,rav,September,13,2018/September/13,2018-09-13
+3,Sun,September 23,1:00PM ET,boxscore,1,0,2-1,0,Denver Broncos,27.0,14.0,20.0,342.0,265.0,77.0,0.0,18.0,293.0,173.0,120.0,1.0,8.96,7.96,-5.82,2018,rav,September,23,2018/September/23,2018-09-23
+4,Sun,September 30,8:20PM ET,boxscore,1,0,3-1,1,Pittsburgh Steelers,26.0,14.0,24.0,451.0,355.0,96.0,1.0,14.0,284.0,265.0,19.0,2.0,7.71,10.05,-2.06,2018,rav,September,30,2018/September/30,2018-09-30
+5,Sun,October 7,1:00PM ET,boxscore,0,1,3-2,1,Cleveland Browns,9.0,12.0,25.0,410.0,294.0,116.0,2.0,20.0,416.0,304.0,112.0,1.0,-11.13,7.48,2.05,2018,rav,October,7,2018/October/7,2018-10-07
+6,Sun,October 14,4:25PM ET,boxscore,1,0,4-2,1,Tennessee Titans,21.0,0.0,23.0,361.0,238.0,123.0,1.0,7.0,106.0,51.0,55.0,0.0,12.84,15.17,-2.21,2018,rav,October,14,2018/October/14,2018-10-14
+7,Sun,October 21,4:05PM ET,boxscore,0,0,4-3,0,New Orleans Saints,23.0,24.0,25.0,351.0,274.0,77.0,0.0,26.0,339.0,205.0,134.0,1.0,16.64,-12.99,-7.63,2018,rav,October,21,2018/October/21,2018-10-21
+8,Sun,October 28,1:00PM ET,boxscore,0,0,4-4,1,Carolina Panthers,21.0,36.0,20.0,325.0,224.0,101.0,3.0,22.0,386.0,232.0,154.0,0.0,1.24,-18.22,7.88,2018,rav,October,28,2018/October/28,2018-10-28
+9,Sun,November 4,1:00PM ET,boxscore,0,0,4-5,0,Pittsburgh Steelers,16.0,23.0,18.0,265.0,204.0,61.0,0.0,27.0,395.0,282.0,113.0,0.0,7.37,-17.75,4.01,2018,rav,November,4,2018/November/4,2018-11-04
+11,Sun,November 18,1:00PM ET,boxscore,1,0,5-5,0,Cincinnati Bengals,24.0,21.0,23.0,403.0,136.0,267.0,1.0,15.0,255.0,207.0,48.0,0.0,2.66,0.01,-5.08,2018,rav,November,18,2018/November/18,2018-11-18
+12,Sun,November 25,1:00PM ET,boxscore,1,0,6-5,0,Oakland Raiders,34.0,17.0,23.0,416.0,174.0,242.0,2.0,13.0,249.0,182.0,67.0,1.0,11.19,8.83,2.03,2018,rav,November,25,2018/November/25,2018-11-25
+13,Sun,December 2,1:00PM ET,boxscore,1,0,7-5,1,Atlanta Falcons,26.0,16.0,25.0,366.0,159.0,207.0,1.0,16.0,131.0,97.0,34.0,1.0,-1.63,13.31,-1.11,2018,rav,December,2,2018/December/2,2018-12-02
+14,Sun,December 9,1:00PM ET,boxscore,0,1,7-6,1,Kansas City Chiefs,24.0,27.0,24.0,321.0,127.0,194.0,1.0,30.0,442.0,348.0,94.0,1.0,4.92,-17.44,9.52,2018,rav,December,9,2018/December/9,2018-12-09
+15,Sun,December 16,1:00PM ET,boxscore,1,0,8-6,0,Tampa Bay Buccaneers,20.0,12.0,24.0,370.0,128.0,242.0,2.0,12.0,241.0,156.0,85.0,1.0,6.86,6.0,-2.23,2018,rav,December,16,2018/December/16,2018-12-16
+16,Sat,December 22,8:20PM ET,boxscore,1,0,9-6,1,Los Angeles Chargers,22.0,10.0,15.0,361.0,202.0,159.0,1.0,14.0,198.0,147.0,51.0,3.0,-3.87,21.26,-1.7,2018,rav,December,22,2018/December/22,2018-12-22
+17,Sun,December 30,4:25PM ET,boxscore,1,0,10-6,0,Cleveland Browns,26.0,24.0,24.0,463.0,167.0,296.0,1.0,18.0,426.0,376.0,50.0,3.0,7.31,-9.49,2.95,2018,rav,December,30,2018/December/30,2018-12-30
+Wild Card,Sun,January 6,1:05PM ET,boxscore,0,0,10-7,0,Los Angeles Chargers,17.0,23.0,11.0,229.0,139.0,90.0,3.0,14.0,243.0,154.0,89.0,1.0,-14.46,9.17,2.32,2018,rav,January,6,2018/January/6,2018-01-06
+1,Sun,September 8,1:00PM ET,boxscore,1,0,1-0,1,Miami Dolphins,59.0,10.0,31.0,643.0,378.0,265.0,0.0,12.0,200.0,179.0,21.0,3.0,42.69,9.29,0.99,2019,rav,September,8,2019/September/8,2019-09-08
+2,Sun,September 15,1:00PM ET,boxscore,1,0,2-0,0,Arizona Cardinals,23.0,17.0,26.0,440.0,258.0,182.0,0.0,15.0,349.0,329.0,20.0,0.0,11.6,-4.48,4.18,2019,rav,September,15,2019/September/15,2019-09-15
+3,Sun,September 22,1:00PM ET,boxscore,0,0,2-1,1,Kansas City Chiefs,28.0,33.0,29.0,452.0,249.0,203.0,0.0,27.0,503.0,363.0,140.0,0.0,14.5,-25.98,4.79,2019,rav,September,22,2019/September/22,2019-09-22
+4,Sun,September 29,1:00PM ET,boxscore,0,0,2-2,0,Cleveland Browns,25.0,40.0,24.0,395.0,222.0,173.0,3.0,22.0,530.0,337.0,193.0,1.0,4.82,-23.04,3.35,2019,rav,September,29,2019/September/29,2019-09-29
+5,Sun,October 6,1:00PM ET,boxscore,1,1,3-2,1,Pittsburgh Steelers,26.0,23.0,22.0,277.0,139.0,138.0,3.0,18.0,269.0,192.0,77.0,2.0,-4.12,1.8,5.32,2019,rav,October,6,2019/October/6,2019-10-06
+6,Sun,October 13,1:00PM ET,boxscore,1,0,4-2,0,Cincinnati Bengals,23.0,17.0,26.0,497.0,228.0,269.0,1.0,18.0,250.0,217.0,33.0,1.0,15.13,-0.57,-4.92,2019,rav,October,13,2019/October/13,2019-10-13
+7,Sun,October 20,4:25PM ET,boxscore,1,0,5-2,1,Seattle Seahawks,30.0,16.0,14.0,340.0,141.0,199.0,0.0,20.0,347.0,241.0,106.0,2.0,7.42,6.98,0.09,2019,rav,October,20,2019/October/20,2019-10-20
+9,Sun,November 3,8:20PM ET,boxscore,1,0,6-2,0,New England Patriots,37.0,20.0,26.0,372.0,162.0,210.0,2.0,22.0,342.0,268.0,74.0,2.0,14.46,5.25,-5.09,2019,rav,November,3,2019/November/3,2019-11-03
+10,Sun,November 10,1:00PM ET,boxscore,1,0,7-2,1,Cincinnati Bengals,49.0,13.0,20.0,379.0,243.0,136.0,1.0,21.0,307.0,150.0,157.0,3.0,24.79,18.52,-7.48,2019,rav,November,10,2019/November/10,2019-11-10
+11,Sun,November 17,1:00PM ET,boxscore,1,0,8-2,0,Houston Texans,41.0,7.0,25.0,491.0,235.0,256.0,0.0,16.0,232.0,110.0,122.0,2.0,31.56,13.24,-6.15,2019,rav,November,17,2019/November/17,2019-11-17
+12,Mon,November 25,8:15PM ET,boxscore,1,0,9-2,1,Los Angeles Rams,45.0,6.0,31.0,480.0,195.0,285.0,0.0,14.0,221.0,199.0,22.0,2.0,32.32,8.52,-4.27,2019,rav,November,25,2019/November/25,2019-11-25
+13,Sun,December 1,1:00PM ET,boxscore,1,0,10-2,0,San Francisco 49ers,20.0,17.0,21.0,283.0,105.0,178.0,1.0,15.0,331.0,157.0,174.0,1.0,6.4,-6.2,1.2,2019,rav,December,1,2019/December/1,2019-12-01
+14,Sun,December 8,1:00PM ET,boxscore,1,0,11-2,1,Buffalo Bills,24.0,17.0,18.0,257.0,139.0,118.0,1.0,16.0,209.0,105.0,104.0,1.0,-0.75,10.78,-2.47,2019,rav,December,8,2019/December/8,2019-12-08
+15,Thu,December 12,8:20PM ET,boxscore,1,0,12-2,0,New York Jets,42.0,21.0,23.0,430.0,212.0,218.0,0.0,13.0,310.0,207.0,103.0,2.0,25.99,6.5,-9.13,2019,rav,December,12,2019/December/12,2019-12-12
+16,Sun,December 22,1:00PM ET,boxscore,1,0,13-2,1,Cleveland Browns,31.0,15.0,31.0,481.0,238.0,243.0,1.0,17.0,241.0,184.0,57.0,1.0,21.45,0.38,-4.46,2019,rav,December,22,2019/December/22,2019-12-22
+17,Sun,December 29,4:25PM ET,boxscore,1,0,14-2,0,Pittsburgh Steelers,28.0,10.0,19.0,304.0,81.0,223.0,2.0,10.0,168.0,77.0,91.0,2.0,-4.16,11.07,8.63,2019,rav,December,29,2019/December/29,2019-12-29
+Division,Sat,January 11,8:15PM ET,boxscore,0,0,14-3,0,Tennessee Titans,12.0,28.0,29.0,530.0,345.0,185.0,3.0,15.0,300.0,83.0,217.0,0.0,-4.11,-10.45,-1.35,2019,rav,January,11,2019/January/11,2019-01-11
+1,Sun,September 13,1:00PM ET,boxscore,1,0,1-0,0,Cleveland Browns,38.0,6.0,23.0,381.0,270.0,111.0,1.0,20.0,306.0,168.0,138.0,3.0,16.62,8.32,8.64,2020,rav,September,13,2020/September/13,2020-09-13
+2,Sun,September 20,4:25PM ET,boxscore,1,0,2-0,1,Houston Texans,33.0,16.0,23.0,407.0,177.0,230.0,0.0,18.0,304.0,253.0,51.0,2.0,15.93,5.68,-3.2,2020,rav,September,20,2020/September/20,2020-09-20
+3,Mon,September 28,8:15PM ET,boxscore,0,0,2-1,0,Kansas City Chiefs,20.0,34.0,16.0,228.0,70.0,158.0,1.0,29.0,517.0,385.0,132.0,1.0,-4.74,-26.62,17.39,2020,rav,September,28,2020/September/28,2020-09-28
+4,Sun,October 4,1:00PM ET,boxscore,1,0,3-1,1,Washington Football Team,31.0,17.0,18.0,350.0,206.0,144.0,2.0,24.0,343.0,274.0,69.0,1.0,8.74,-2.58,9.39,2020,rav,October,4,2020/October/4,2020-10-04
+5,Sun,October 11,1:00PM ET,boxscore,1,0,4-1,0,Cincinnati Bengals,27.0,3.0,17.0,332.0,171.0,161.0,1.0,12.0,205.0,135.0,70.0,3.0,2.28,28.69,-3.99,2020,rav,October,11,2020/October/11,2020-10-11
+6,Sun,October 18,1:00PM ET,boxscore,1,0,5-1,1,Philadelphia Eagles,30.0,28.0,17.0,355.0,173.0,182.0,0.0,19.0,364.0,170.0,194.0,1.0,-0.7,-1.83,9.68,2020,rav,October,18,2020/October/18,2020-10-18
+8,Sun,November 1,1:00PM ET,boxscore,0,0,5-2,0,Pittsburgh Steelers,24.0,28.0,25.0,457.0,192.0,265.0,4.0,19.0,221.0,173.0,48.0,1.0,3.94,-4.67,0.54,2020,rav,November,1,2020/November/1,2020-11-01
+9,Sun,November 8,1:00PM ET,boxscore,1,0,6-2,1,Indianapolis Colts,24.0,10.0,19.0,266.0,156.0,110.0,1.0,20.0,339.0,227.0,112.0,2.0,-0.58,13.1,-1.45,2020,rav,November,8,2020/November/8,2020-11-08
+10,Sun,November 15,8:20PM ET,boxscore,0,0,6-3,1,New England Patriots,17.0,23.0,19.0,357.0,242.0,115.0,1.0,25.0,308.0,135.0,173.0,0.0,3.45,-13.95,1.86,2020,rav,November,15,2020/November/15,2020-11-15
+11,Sun,November 22,1:00PM ET,boxscore,0,1,6-4,0,Tennessee Titans,24.0,30.0,21.0,306.0,177.0,129.0,1.0,26.0,423.0,250.0,173.0,1.0,7.48,-13.91,-0.86,2020,rav,November,22,2020/November/22,2020-11-22
+12,Wed,December 2,3:40PM ET,boxscore,0,0,6-5,1,Pittsburgh Steelers,14.0,19.0,10.0,219.0,90.0,129.0,2.0,22.0,334.0,266.0,68.0,2.0,-12.11,-2.03,10.71,2020,rav,December,2,2020/December/2,2020-12-02
+13,Tue,December 8,8:05PM ET,boxscore,1,0,7-5,0,Dallas Cowboys,34.0,17.0,19.0,401.0,107.0,294.0,1.0,29.0,388.0,277.0,111.0,1.0,19.5,-10.45,3.43,2020,rav,December,8,2020/December/8,2020-12-08
+14,Mon,December 14,8:15PM ET,boxscore,1,0,8-5,1,Cleveland Browns,47.0,42.0,25.0,385.0,154.0,231.0,0.0,33.0,493.0,355.0,138.0,1.0,24.92,-23.63,5.17,2020,rav,December,14,2020/December/14,2020-12-14
+15,Sun,December 20,1:00PM ET,boxscore,1,0,9-5,0,Jacksonville Jaguars,40.0,14.0,26.0,409.0,250.0,159.0,1.0,17.0,267.0,205.0,62.0,1.0,24.92,1.7,-0.13,2020,rav,December,20,2020/December/20,2020-12-20
+16,Sun,December 27,1:00PM ET,boxscore,1,0,10-5,0,New York Giants,27.0,13.0,25.0,432.0,183.0,249.0,1.0,24.0,269.0,215.0,54.0,0.0,17.45,3.69,-5.16,2020,rav,December,27,2020/December/27,2020-12-27
+17,Sun,January 3,1:00PM ET,boxscore,1,0,11-5,1,Cincinnati Bengals,38.0,3.0,24.0,525.0,121.0,404.0,1.0,10.0,195.0,48.0,147.0,2.0,24.61,14.61,-7.13,2020,rav,January,3,2020/January/3,2020-01-03
+Wild Card,Sun,January 10,1:05PM ET,boxscore,1,0,12-5,1,Tennessee Titans,20.0,13.0,22.0,401.0,165.0,236.0,1.0,12.0,209.0,158.0,51.0,1.0,10.95,2.51,-2.13,2020,rav,January,10,2020/January/10,2020-01-10
+Division,Sat,January 16,8:15PM ET,boxscore,0,0,12-6,1,Buffalo Bills,3.0,17.0,19.0,340.0,190.0,150.0,1.0,17.0,220.0,188.0,32.0,0.0,-14.36,3.68,-1.22,2020,rav,January,16,2020/January/16,2020-01-16
+1,Mon,September 13,8:15PM ET,boxscore,0,1,0-1,1,Las Vegas Raiders,27.0,33.0,20.0,406.0,217.0,189.0,2.0,26.0,491.0,409.0,82.0,1.0,3.0,-11.58,2.58,2021,rav,September,13,2021/September/13,2021-09-13
+2,Sun,September 19,8:20PM ET,boxscore,1,0,1-1,0,Kansas City Chiefs,36.0,35.0,31.0,481.0,230.0,251.0,2.0,22.0,405.0,343.0,62.0,2.0,16.88,-15.89,-1.01,2021,rav,September,19,2021/September/19,2021-09-19
+3,Sun,September 26,1:00PM ET,boxscore,1,0,2-1,1,Detroit Lions,19.0,17.0,15.0,387.0,271.0,116.0,1.0,22.0,285.0,192.0,93.0,0.0,5.18,-5.76,1.42,2021,rav,September,26,2021/September/26,2021-09-26
+4,Sun,October 3,4:25PM ET,boxscore,1,0,3-1,1,Denver Broncos,23.0,7.0,20.0,406.0,304.0,102.0,0.0,15.0,254.0,148.0,106.0,1.0,3.9,10.92,1.59,2021,rav,October,3,2021/October/3,2021-10-03
+5,Mon,October 11,8:15PM ET,boxscore,1,1,4-1,0,Indianapolis Colts,31.0,25.0,30.0,523.0,437.0,86.0,1.0,29.0,513.0,390.0,123.0,1.0,21.15,-24.0,6.85,2021,rav,October,11,2021/October/11,2021-10-11
+6,Sun,October 17,1:00PM ET,boxscore,1,0,5-1,0,Los Angeles Chargers,34.0,6.0,27.0,327.0,140.0,187.0,2.0,14.0,208.0,182.0,26.0,1.0,7.5,13.93,4.48,2021,rav,October,17,2021/October/17,2021-10-17
+7,Sun,October 24,1:00PM ET,boxscore,0,0,5-2,0,Cincinnati Bengals,17.0,41.0,20.0,393.0,278.0,115.0,0.0,19.0,520.0,409.0,111.0,1.0,-2.69,-19.58,2.13,2021,rav,October,24,2021/October/24,2021-10-24
+9,Sun,November 7,1:00PM ET,boxscore,1,1,6-2,0,Minnesota Vikings,34.0,31.0,36.0,500.0,253.0,247.0,2.0,13.0,318.0,187.0,131.0,0.0,20.4,-9.21,-8.25,2021,rav,November,7,2021/November/7,2021-11-07
+10,Thu,November 11,8:20PM ET,boxscore,0,0,6-3,1,Miami Dolphins,10.0,22.0,23.0,304.0,210.0,94.0,2.0,17.0,350.0,290.0,60.0,0.0,-13.81,4.72,-0.84,2021,rav,November,11,2021/November/11,2021-11-11

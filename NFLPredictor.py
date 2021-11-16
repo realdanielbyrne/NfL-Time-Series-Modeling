@@ -41,7 +41,7 @@ def getMatchupData(team1='dal',
     return teams
 
 
-def getTeamGameStats(team='dal', years=['2018', '2019', '2020', '2021']):
+def getTeamGameStats(team='dal', years=['2018', '2019', '2020', '2021'], timestamp_index = False):
     stats = pd.DataFrame()
     for year in years:
         url = baseurl.format(team=team, year=year)
@@ -64,10 +64,13 @@ def getTeamGameStats(team='dal', years=['2018', '2019', '2020', '2021']):
     stats['W/L'] = np.where((stats['W/L'] == 'W'), 1, 0)
     stats['Def_TO'] = stats['Def_TO'].fillna(0)
     stats['Off_TO'] = stats['Off_TO'].fillna(0)
-
-    stats.index = pd.RangeIndex(len(stats.index))
-    stats.index = range(len(stats.index))
     stats['Team'] = team
+
+    if timestamp_index:
+        stats.set_index(stats['Timestamp'])
+    else:
+        stats.index = pd.RangeIndex(len(stats.index))
+        stats.index = range(len(stats.index))
 
     return stats
 
