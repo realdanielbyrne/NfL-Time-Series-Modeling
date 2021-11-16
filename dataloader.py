@@ -12,9 +12,10 @@ teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'sea', 'tam', 'oti', 'was']
 
 team='dal'
-timestamp_index=True
+timeindex=True
 start=2018
 stop=2022
+year=2021
 to_csv=True
 
 
@@ -50,6 +51,10 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
         df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
         df['@'] = np.where((df['@'] == '@'), 1, 0)
         df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
+        df[['W','L']] =df['Record'].str.split('-',expand=True)
+        df['W'] = df['W'].astype(int)
+        df['L'] = df['L'].astype(int)
+        df['Win%']=df.W/(df.L+df.W)
         
         stats = stats.append(df)
     
@@ -60,7 +65,7 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     stats[['month', 'day']] = stats.Date.str.split(expand=True)
     stats['Timestamp_str'] = stats['year'].str.cat(stats['month'], sep="/").str.cat(stats['day'], sep="/")
     stats['Timestamp'] = pd.to_datetime(stats['Timestamp_str'], format="%Y/%B/%d")
-
+    stats.drop(columns=['BoxScore','Date','Timestamp_str'], inplace=True)
     if timeindex:
         stats.set_index(stats['Timestamp'])
     else:
