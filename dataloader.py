@@ -11,11 +11,12 @@ teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
          'sea', 'tam', 'oti', 'was']
 
-team='dal'
-timestamp_index=True
-start=2018
-stop=2022
-to_csv=True
+# team='dal'
+# timestamp_index=True
+# start=2018
+# stop=2022
+# to_csv=True
+# year = 2021
 
 
 def get_teams_stats(years, to_csv=True, timeindex = False):
@@ -27,6 +28,16 @@ def get_teams_stats(years, to_csv=True, timeindex = False):
 
     return team_stats
 
+def win_pct(c):
+    splits = c.split('-')
+    
+    if len(splits) > 2:
+        w,l,d = int(splits[0]),int(splits[1]),int(splits[2])
+        wpct=w/(w+l+d)
+    else:
+        w,l = int(splits[0]),int(splits[1])
+        wpct=w/(w+l)
+    return wpct
 
 def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     
@@ -50,7 +61,8 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
         df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
         df['@'] = np.where((df['@'] == '@'), 1, 0)
         df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
-        
+
+        df['win_pct']=df['Record'].map(win_pct)
         stats = stats.append(df)
     
     stats['Def_TO'] = stats['Def_TO'].fillna(0)
@@ -60,6 +72,9 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     stats[['month', 'day']] = stats.Date.str.split(expand=True)
     stats['Timestamp_str'] = stats['year'].str.cat(stats['month'], sep="/").str.cat(stats['day'], sep="/")
     stats['Timestamp'] = pd.to_datetime(stats['Timestamp_str'], format="%Y/%B/%d")
+    
+    # drop columns
+    stats.drop(columns=['BoxScore','Timestamp_str','month','day','Date'],inplace=True)
 
     if timeindex:
         stats.set_index(stats['Timestamp'])
@@ -68,7 +83,7 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
         stats.index = range(len(stats.index))
 
     if to_csv:
-        filename = './stats/{team}_{start}_{stop}.csv'.format(team=team,start=start,stop=stop-1)
+        filename = './stats/{team}_{start}_{stop}.csv'.format(team=team,start=years[0],stop=years[-1])
         print('Saving '+team+' stats to '+ filename)
         stats.to_csv(filename,index=False)
 
@@ -81,7 +96,7 @@ if __name__ == "__main__":
     parser.add_argument('-b','--start',
                         action='store',
                         type=int,
-                        default="2018",
+                        default="2017",
                         required=False,
                         help="The first years stats are pulled from.")
 
@@ -110,7 +125,7 @@ if __name__ == "__main__":
     if args.end is None:
         args.end = int(date.today().year)
     if args.start is None:
-        args.start = args.end - 4
+        args.start = args.end - 5
     
     years = [str(i) for i in range(args.start,args.end + 1)]
     team_stats = get_teams_stats(years, args.to_csv,args.timeindex)
