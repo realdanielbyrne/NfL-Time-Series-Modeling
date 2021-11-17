@@ -49,13 +49,13 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
         df_list = pd.read_html(html)
         df = df_list[1]
         df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
-
         df.columns = ['Week', 'Day', 'Date', 'Time', 'BoxScore',
                       'W/L', 'OT', 'Record', '@', 'Opponent', 'TeamScore',
                       'OpponentScore', 'Off_1stDn', 'Off_Totyd', 'Off_PassYd',
                       'Off_RushYd', 'Off_TO', 'Def_1stDn', 'Def_Totyd',
                       'Def_PassYd', 'Def_RushYd', 'Def_TO', 'ExpOff',
                       'ExpDef', 'ExpSpTeams']
+        
         df.dropna(subset=['W/L'], inplace=True)    
         df['year'] = year
         df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
