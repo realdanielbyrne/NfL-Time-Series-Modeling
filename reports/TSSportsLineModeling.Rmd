@@ -1,0 +1,291 @@
+---
+title: "Time Series Modeling of NFL Games for Predicting Betting Lines"
+author: "Daniel Byrne"
+date: "12/5/2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(rvest)
+library(tswge)
+library(nnfor)
+library(mosaic)
+library(vars)
+library(rvest)
+library(knitr)
+
+source('./NFLLinePredictor.r')
+```
+# NFL Time Series Modeling to Predict Betting Lines
+
+If only we could predict the future of any future sporting event... We could be rich!
+![Greys Sports Almanac](./almanac.jpg)
+
+## Quick Start :
+
+ Register for a 7 day free trial to (Pro Football API)[https://profootballapi.com/signup] to receive an API key.
+
+
+ Source this file and execute getPredictions('DAL','CHI') on the r command line
+
+    getPredictions('DAL','CHI', 2019)
+
+
+## Motivation
+
+- To Win!
+- Gamblers on average win between 53% and 55% of the time.
+- Bettors make ~$93,000 a year
+
+Even a +1%  can mean yield money depending on bets made and amount wagered.  
+
+## Traditional Sports Modeling
+
+Traditional methods rely on moving averages
+
+- Dak Prescott’s season completion% in 2016, 2018, and 2019 are within +/-1% of his career average.
+- Players and Teams tend to revert to their mean
+
+Vegas makes modifications to predictions for Home/Away, Weather, and Travel, etc to help improve these mean based predictions.  However, they are wrong 45 - 47% of the time.
+
+```{r}
+
+ypg = list(405,269,246,223,463,278,239,257,397,444,212,355)
+wins = list(1,1,1,0,0,0,1,1,0,1,0,0)
+cp2 = c(78.13,86.67,59.38,66.67,61.36,70,77.78,62.86,60.87,63.04,57.58,65.31,NaN,NaN,NaN)
+cp1 = c(65.52,64,55.88,62.96,62.07,62.96,62.86,67.74,72.22,68.75,70.97,85.71,77.78,61.54,80)
+
+cp = append(cp1,cp2)
+scp = list(67.8,62.9,67.7,66.7)
+old.par <- par(mfrow=c(2, 2))
+plot(1:length(ypg),ypg,main="Dak's Yards Per Game in 2019", type="l")
+plot(1:length(wins),wins,main="Cowboys Win Loss", type="l")
+plot(1:length(cp),cp,main="Dak's 2018-19 Completion %", type="l")
+plot(2016:2019,scp,main="Dak's Season Avg Completion %", type="l")
+par(old.par)
+```
+
+![Zeke's Rushing Yards Per Game 2019](Zeke_rypg.png)
+
+## Time Series Analysis
+
+If we consider the individual seasons of a players or a teams performance as differet realizations of the underlying stationary process then we can also model this process in an attempt to predict the performances game to game. 
+
+```{r}
+daldf = getTeamData()
+plotts.sample.wge(daldf$score)
+```
+
+
+## Theory
+
+Given:
+
+ - Player performances naturally wax and wane over the course of a season
+ - Team performances can be viewed as linear combinations of players and coaches time series performances
+ - Aggregate metrics like Total Yards, Turnovers, Penalties represent aggeregations of the underlying coach and player performances
+ - Team and Player performances exhibit properties of stationary time series processes (Means and SD independent of time)
+
+Thus:
+
+- Modeling team / players performances with time series modeling techiques should be possible
+- If we can predict Highs and Lows, we should be able to predict the winner and margin of victory
+- The team predicted to win will be the team on an upslope relative to their average performance, and their mean value at this point is higher than their competitor.
+
+Process: 
+
+- Model each team as a Stationary Time Series Process independent from their competitor to predict score
+- Difference the predictions to obtain the margin of victory 
+- Win Millions
+
+
+## Challenges
+
+- Teams change composition Year over Year.
+- Consequently, teams can go from being very horrible to very good.  Example :
+  - Ravens
+  - 49ers
+
+- Or go the other way
+  - Jaguars
+  - Rams
+
+- Short Time Series
+  - Short time series (12 game observations / team in NFL this season) are hard to model
+  - AR parameter estimations fail to converge on shorter time series, 
+  - Teams performances from year to year might not be consistent enough to include prior year data
+
+
+## Challenges Continued...
+
+The Following methods work well in practice for short TS data:
+
+- Composite Forecasts
+- Non-linear time series models
+  - Threshold autoregressive (TAR)
+  - Self-exiting TAR (SETAR)
+  - Threshold autoregressive moving average (TARMA)
+  - Neural Networks
+- Modeling by Analogy 
+- Domain Knowledge
+
+In this investigation I use the 
+
+- Modeling by Analogy (Augmenting with similar data)
+  - Current year
+  - Prior year
+  
+- Non-linear MLP Neural Networks
+- Composite Forecasting  (averaging)
+- Domain Knowledge
+
+
+## Data
+
+I pulled data from [ProFootballAPI.com](https://profootballapi.com/docs)
+![ProFootballAPI.Com](profootballapi.com.png)
+I use the (Team)[https://profootballapi.com/teams] and (Schedule)[https://profootballapi.com/schedule] APIS
+
+- I combined Schedule data with team performances
+- Eliminated some columns not pertaining to my models
+- Created calculated columns for score, isHome, and won
+- Added lags of total yards, punt yards, penalty yards, turnovers and score
+
+```{r}
+df = getTeamData('BAL')
+df = df %>% dplyr::select(-trnovr1,-penyds1,-totyds1,-ptyds1,-isHome,-home_score,-away_score,-id)
+kable(head(df))
+```
+
+## Regressors
+
+Depending on the teams again there werew varying levels of cross correlation between some of the more interesting regression parameter candidates
+
+- Turnovers, Total Yards, Penalties, and Punt yards seemed to have more lagging effect than others
+- Intuition states that if a team is high on turnovers one week, coaches and players would be extra cautious in preventing turnovers the next week
+
+
+```{r}
+old.par <- par(mfrow=c(2, 2))
+ccf(df$score,df$trnovr, plot = TRUE)
+ccf(df$score,df$totyds, plot = TRUE)
+ccf(df$score,df$penyds, plot = TRUE)
+ccf(df$score,df$ptyds, plot = TRUE)
+par(mfrow=old.par)
+```
+
+
+## ARIMA Model
+
+- Method Builds Arima model for both teams.
+- Models score as a predictor for team performance.
+- Returns the model predictions for each team, ASED based upon a leave one out approach, and the difference (the line)
+
+Regressor analysis
+ - Regressors variously showed various levels of signifigance depending on the teams I was examining.  
+ - Due to the short time series data horizon (1 3/4 regular seasons), variations in the data appear random.
+ - I chose a list of regressors that seemed to have signifigance across a broad range of teams selected, although individually these regressors may or may not be appropriate for the team model at hand.  
+ - However needed to settle on a single set for consistency across predictions
+ 
+Regressors :
+
+- Total Yards and lag1
+- Turnovers and lag1
+- Penalty Yards and lag1
+- Punt Yards and lag1
+
+## MLP Model
+
+- Builds MLP model for both teams.
+- Models score as a predictor for team performance
+- Returns the model predictions for each team, ASED based upon a leave one out approach, and the difference (the line)
+
+- I intentionally chose a model that would overfit (large capacity) due to the short time series
+- Adding capacity with noisey data can help to tease out some underlying patterns. However you risk modeling noise
+- Forced lags of 1 to keep consistent with other models.  However, the auto selector chose lags 1:4.
+
+Regressors :
+
+- Total Yards and lag1
+- Turnovers and lag1
+- Penalty Yards and lag1
+- Punt Yards and lag1
+
+I placed an option in the mlp_model method to allow the mlp routine to choose the lags.
+
+```{r}
+teams = getMatchupData('DAL', 'CHI', 2019)
+# Team 1 model
+t1 = teams[[1]]
+score1 = t1$score
+l = length(t1$score)-1 
+score_ts1 = ts(score1[1:l])
+t1_2 = t1[1:l,]
+
+t1xregs = data.frame(totyds = ts(t1_2$totyds), 
+                     trnovr = ts(t1_2$trnovr), 
+                     penyds = ts(t1_2$penyds),
+                     ptyds  = ts(t1_2$ptyds))
+
+team1_fit = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(1,1,1,1), lags = 1)
+
+plot(team1_fit)
+team1_fit_laggy = mlp(score_ts1, xreg = t1xregs, hd=c(8,4,2), sel.lag=TRUE, hd.auto.type = "elm", reps = 100, xreg.lags = list(1,1,1,1))
+
+
+plot(team1_fit_laggy)
+```
+
+## VAR Model
+
+- Builds a "trend" VAR model for both team
+- Models score as a predictor for team performance
+- Returns the model predictions for each team, ASE based upon a leave one out approach, and the difference (the line)
+- The VAR OLS algorithm picks the lagscago
+
+
+Regressors :
+
+- Total Yards 
+- Turnovers 
+- Penalty Yards 
+- Punt Yards 
+
+
+## Ensemble Model
+
+The ensemble model simply averages the results from all other models
+
+
+## Results
+
+I ran the code to predict the outcome of the Dallas/Chicago game.  
+
+Vegas
+
+- Dallas was a 2.5 point road favorite, they ended up losing by 7.  
+- The Over Under was predicted to be 43.5, the actual was 55
+- The money line setteled on -150 for Dallas.  Chicago ended up winning.
+
+Time Series Model
+
+- The ts model would have wone on the moneyline
+- The ts model would have won on the over under, predicting over which was correct
+- The ts model would have won on the line (-2.5 Dallas) predicting (Chicago -7, ensemble)
+
+```{r}
+df = getPredictions()
+kable(df)
+```
+
+## Conclusions
+
+This time series approach to modeling seems to have some value.  I would bet the house on it yet, but I belive this investigation shows that the approach has merit.
+
+
+
+
+
