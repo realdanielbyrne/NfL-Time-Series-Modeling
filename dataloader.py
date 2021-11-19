@@ -96,12 +96,13 @@ if __name__ == "__main__":
     parser.add_argument('-b','--start',
                         action='store',
                         type=int,
-                        default="2017",
+                        default=int(date.today().year)-5,
                         required=False,
                         help="The first years stats are pulled from.")
 
     parser.add_argument('-e','--end',
                         type=int,
+                        default=int(date.today().year),
                         required=False,
                         help="The last year stats are pulled.")
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     if args.end is None:
         args.end = int(date.today().year)
     if args.start is None:
-        args.start = args.end - 5
+        args.start = args.end - 6
     
     years = [str(i) for i in range(args.start,args.end + 1)]
     team_stats = get_teams_stats(years, args.to_csv,args.timeindex)
