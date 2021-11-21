@@ -1,3 +1,4 @@
+#%%
 import pandas as pd
 import numpy as np
 import requests
@@ -5,20 +6,22 @@ from datetime import date
 import argparse
 
 
-baseurl = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
+gamelog_url = 'https://www.pro-football-reference.com/teams/{team}/{year}/gamelog/'
+game_results_url = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
+
 teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'den', 'det', 'gnb', 'htx', 'clt', 'jax', 'kan', 'rai', 'sdg',
          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
          'sea', 'tam', 'oti', 'was']
 
-# team='dal'
-# timestamp_index=True
-# start=2018
-# stop=2022
-# to_csv=True
-# year = 2021
+team='dal'
+timestamp_index=True
+start=2018
+stop=2022
+to_csv=True
+year = 2021
 
-
+#%%
 def get_teams_stats(years, to_csv=True, timeindex = False):
     
     team_stats = {}
@@ -28,6 +31,7 @@ def get_teams_stats(years, to_csv=True, timeindex = False):
 
     return team_stats
 
+#%%
 def win_pct(c):
     splits = c.split('-')
     
@@ -39,30 +43,69 @@ def win_pct(c):
         wpct=w/(w+l)
     return wpct
 
+#%%
+def get_gamelog(team,year):
+    url = gamelog_url.format(team=team, year=str(year))
+    html = requests.get(url).content
+    df_list = pd.read_html(html)
+    df = df_list[0]
+    df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
+    df.columns = ['Week', 'Day', 'Date', 'Boxscore', 'W/L', 'OT', '@','Opp',
+                    'TmScore', 'OppScore',
+                    'PassCmp', 'PassAtt', 'PassYds','PassTd', 'PassInt',
+                    'Sacks', 'SackYds', 'PassY/A', 'PassNY/A', 'Cmp%', 'Qbr',
+                    'RushAtt','RushYds','RushY/A','RushTd',
+                    'FGM','FGA','XPM','XPA',
+                    'Pnt','PntYds',
+                    '3DConv','3DAtt','4DConv','4DAtt','ToP']
+
+    df.dropna(subset=['W/L'], inplace=True)    
+    df['Year'] = year
+    df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
+    df['@'] = np.where((df['@'] == '@'), 1, 0)
+    df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
+    df['Team'] = team
+    return df
+
+#%%
+def get_game_results(team,year):
+    # scrape data from pro-football reference
+    url = game_results_url.format(team=team, year=year)
+    html = requests.get(url).content
+    df_list = pd.read_html(html)
+    df = df_list[1]
+    
+    # flatten index and rename columns
+    df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
+    df.columns = ['Week', 'Day', 'Date', 'Time', 'BoxScore',
+                    'W/L', 'OT', 'Record', '@', 'Opp', 'TmScore',
+                    'OppScore', 'Off_1stDn', 'Off_Totyd', 'Off_PassYd',
+                    'Off_RushYd', 'Off_TO', 'Def_1stDn', 'Def_Totyd',
+                    'Def_PassYd', 'Def_RushYd', 'Def_TO', 'ExpOff',
+                    'ExpDef', 'ExpSpTeams']
+    
+    # cleanup
+    df = df.dropna(subset=['W/L'])
+    df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
+    df['@'] = np.where((df['@'] == '@'), 1, 0)
+    df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
+    df['Def_TO'] = df['Def_TO'].fillna(0)
+    df['Off_TO'] = df['Off_TO'].fillna(0)
+    df['Team'] = team
+    df['Win%']=df['Record'].map(win_pct)
+    df.set_index()
+    return df
+
+#%%
 def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     
     stats = pd.DataFrame()
-
     for year in years:
-        url = baseurl.format(team=team, year=str(year))
-        html = requests.get(url).content
-        df_list = pd.read_html(html)
-        df = df_list[1]
-        df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
-        df.columns = ['Week', 'Day', 'Date', 'Time', 'BoxScore',
-                      'W/L', 'OT', 'Record', '@', 'Opponent', 'TeamScore',
-                      'OpponentScore', 'Off_1stDn', 'Off_Totyd', 'Off_PassYd',
-                      'Off_RushYd', 'Off_TO', 'Def_1stDn', 'Def_Totyd',
-                      'Def_PassYd', 'Def_RushYd', 'Def_TO', 'ExpOff',
-                      'ExpDef', 'ExpSpTeams']
+        gl = get_gamelog(team,year)
+        gr = get_game_results(team,year)
         
-        df.dropna(subset=['W/L'], inplace=True)    
-        df['year'] = year
-        df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
-        df['@'] = np.where((df['@'] == '@'), 1, 0)
-        df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
-
-        df['win_pct']=df['Record'].map(win_pct)
+        wpct = gr[['Win%']]
+        gl.merge(wpct)
         stats = stats.append(df)
     
     stats['Def_TO'] = stats['Def_TO'].fillna(0)
@@ -89,7 +132,7 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
 
     return stats
 
-
+#%%
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='NFL spread Predictor.')
