@@ -5,7 +5,7 @@ import warnings
 import argparse
 from darts import TimeSeries
 from darts.dataprocessing.transformers import Scaler
-from darts.utils.likelihood_models import GaussianLikelihoodModel
+from darts.utils.likelihood_models import GaussianLikelihood
 from darts.models import (
     ExponentialSmoothing,
     AutoARIMA,
@@ -21,6 +21,7 @@ from darts.models import (
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
+warnings.filterwarnings("ignore")
 
 baseurl = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
 
@@ -70,7 +71,6 @@ def getTeamGameStats(team='dal', years=['2018', '2019', '2020', '2021'], timesta
         stats.set_index(stats['Timestamp'])
     else:
         stats.index = pd.RangeIndex(len(stats.index))
-        stats.index = range(len(stats.index))
 
     return stats
 
@@ -204,7 +204,7 @@ def brnn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2):
         model='LSTM',
         input_chunk_length=10,
         output_chunk_length=1,
-        n_epochs=300,
+        n_epochs=200,
         model_name='Brnn',
         force_reset=True)
 
@@ -226,14 +226,14 @@ def rnn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2):
         hidden_dim=30,
         dropout=0.2,
         batch_size=32,
-        n_epochs=200,
+        n_epochs=100,
         optimizer_kwargs={'lr': 1e-3},
         model_name='RNN_model',
         log_tensorboard=True,
         training_length=40,
         input_chunk_length=8,
         force_reset=True,
-        likelihood=GaussianLikelihoodModel()
+        likelihood=GaussianLikelihood()
     )
 
     rnn.fit([train1, train2],
@@ -269,7 +269,7 @@ def tcn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2):
     deeptcn = TCNModel(
         dropout=0.2,
         batch_size=32,
-        n_epochs=400,
+        n_epochs=200,
         optimizer_kwargs={'lr': 1e-3},
         dilation_base=2,
         num_layers=2,
@@ -279,7 +279,7 @@ def tcn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2):
         kernel_size=4,
         model_name="tcn_model",
         num_filters=6,
-        likelihood=GaussianLikelihoodModel(),
+        likelihood=GaussianLikelihood(),
         force_reset=True
     )
 
@@ -305,7 +305,7 @@ def beats_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2, scale=
         generic_architecture=False,
         force_reset=True,
         nr_epochs_val_period=5,
-        n_epochs=200)
+        n_epochs=100)
 
     beatsmodel.fit(series=[train1, train2],
                    past_covariates=[cov1, cov2],
@@ -329,7 +329,7 @@ def beats_model_generic(train1, train2, cov1, cov2, scale1, scale2, team1, team2
         num_layers=4,
         num_stacks=5,
         force_reset=True,
-        n_epochs=200)
+        n_epochs=100)
 
     beatsmodel.fit([train1, train2], past_covariates=[cov1, cov2], verbose=True)
     p = beatsmodel.predict(1, series=[train1, train2], past_covariates=[cov1, cov2])
@@ -345,11 +345,11 @@ def transformer_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2):
         input_chunk_length=8,
         output_chunk_length=1,
         batch_size=32,
-        n_epochs=200,
+        n_epochs=100,
         model_name='transformer',
         d_model=16,
         nhead=4,
-        likelihood=GaussianLikelihoodModel(),
+        likelihood=GaussianLikelihood(),
         num_encoder_layers=3,
         num_decoder_layers=3,
         dim_feedforward=32,
@@ -428,12 +428,12 @@ if __name__ == "__main__":
     args = parser.parse_args("")
     teams = []
 
-    # teams.append(['atl','nor'])
-    # teams.append(['den','dal'])
-    # teams.append(['htx','mia'])
-    # teams.append(['min','rav'])
-    # teams.append(['cle','cin'])
-    teams.append(['kan', 'gnb'])
+    teams.append(['dal','kan'])
+    teams.append(['sfo','jax'])
+    teams.append(['det','cle'])
+    teams.append(['was','car'])
+    teams.append(['nor','phi'])
+    teams.append(['gnb', 'min'])
 
     target_col = 'TeamScore'
     years = ['2018', '2019', '2020', '2021']
@@ -465,10 +465,10 @@ if __name__ == "__main__":
         preds.append(randomforest_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds.append(exp_model(t1data, t2data, team1, team2))
         preds.append(brnn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
-        preds.append(regression_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
+        #preds.append(regression_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds.append(rnn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds.append(tcn_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
-        preds.append(beats_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
+        #preds.append(beats_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds.append(beats_model_generic(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds.append(transformer_model(train1, train2, cov1, cov2, scale1, scale2, team1, team2))
         preds_df = ensemble_model(preds)

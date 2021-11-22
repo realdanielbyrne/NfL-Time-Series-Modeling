@@ -14,12 +14,12 @@ teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
          'sea', 'tam', 'oti', 'was']
 
-team='dal'
-timestamp_index=True
-start=2018
-stop=2022
-to_csv=True
-year = 2021
+# team='dal'
+# timestamp_index=True
+# start=2018
+# stop=2022
+# to_csv=True
+# year = '2021'
 
 #%%
 def get_teams_stats(years, to_csv=True, timeindex = False):
@@ -47,10 +47,10 @@ def win_pct(c):
 def get_gamelog(team,year):
     url = gamelog_url.format(team=team, year=str(year))
     html = requests.get(url).content
-    df_list = pd.read_html(html)
-    df = df_list[0]
-    df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
-    df.columns = ['Week', 'Day', 'Date', 'Boxscore', 'W/L', 'OT', '@','Opp',
+    gl_list = pd.read_html(html)
+    gl = gl_list[0].copy()
+    gl.columns = ["_".join(a) for a in gl.columns.to_flat_index()]
+    gl.columns = ['Week', 'Day', 'Date', 'Boxscore', 'W/L', 'OT', '@','Opp',
                     'TmScore', 'OppScore',
                     'PassCmp', 'PassAtt', 'PassYds','PassTd', 'PassInt',
                     'Sacks', 'SackYds', 'PassY/A', 'PassNY/A', 'Cmp%', 'Qbr',
@@ -59,25 +59,31 @@ def get_gamelog(team,year):
                     'Pnt','PntYds',
                     '3DConv','3DAtt','4DConv','4DAtt','ToP']
 
-    df.dropna(subset=['W/L'], inplace=True)    
-    df['Year'] = year
-    df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
-    df['@'] = np.where((df['@'] == '@'), 1, 0)
-    df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
-    df['Team'] = team
-    return df
+    gl.dropna(subset=['W/L'], inplace=True)    
+    gl['Year'] = year
+    gl['OT'] = np.where((gl['OT'] == 'OT'), 1, 0)
+    gl['@'] = np.where((gl['@'] == '@'), 1, 0)
+    gl['W/L'] = np.where((gl['W/L'] == 'W'), 1, 0)
+    gl['Team'] = team
+    gl[['month','day']] = gl.Date.str.split(expand=True)
+    gl['Timestamp_str'] = gl['Year'].str.cat(gl['month'], sep ="/").str.cat(gl['day'], sep ="/")
+    gl['Timestamp'] = pd.to_datetime(gl['Timestamp_str'], format="%Y/%B/%d")
+    gl.drop(columns=['Boxscore','Timestamp_str','month','day','Week','Day','Date'],inplace=True)
+    gl.index = pd.RangeIndex(len(gl.index))
+    
+    return gl
 
 #%%
 def get_game_results(team,year):
     # scrape data from pro-football reference
     url = game_results_url.format(team=team, year=year)
     html = requests.get(url).content
-    df_list = pd.read_html(html)
-    df = df_list[1]
+    gr_list = pd.read_html(html)
+    gr = gr_list[1].copy()
     
     # flatten index and rename columns
-    df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
-    df.columns = ['Week', 'Day', 'Date', 'Time', 'BoxScore',
+    gr.columns = ["_".join(a) for a in gr.columns.to_flat_index()]
+    gr.columns = ['Week', 'Day', 'Date', 'Time', 'Boxscore',
                     'W/L', 'OT', 'Record', '@', 'Opp', 'TmScore',
                     'OppScore', 'Off_1stDn', 'Off_Totyd', 'Off_PassYd',
                     'Off_RushYd', 'Off_TO', 'Def_1stDn', 'Def_Totyd',
@@ -85,16 +91,22 @@ def get_game_results(team,year):
                     'ExpDef', 'ExpSpTeams']
     
     # cleanup
-    df = df.dropna(subset=['W/L'])
-    df['OT'] = np.where((df['OT'] == 'OT'), 1, 0)
-    df['@'] = np.where((df['@'] == '@'), 1, 0)
-    df['W/L'] = np.where((df['W/L'] == 'W'), 1, 0)
-    df['Def_TO'] = df['Def_TO'].fillna(0)
-    df['Off_TO'] = df['Off_TO'].fillna(0)
-    df['Team'] = team
-    df['Win%']=df['Record'].map(win_pct)
-    df.set_index()
-    return df
+    gr = gr.dropna(subset=['W/L'])
+    gr['OT'] = np.where((gr['OT'] == 'OT'), 1, 0)
+    gr['@'] = np.where((gr['@'] == '@'), 1, 0)
+    gr['W/L'] = np.where((gr['W/L'] == 'W'), 1, 0)
+    gr['Def_TO'] = gr['Def_TO'].fillna(0)
+    gr['Off_TO'] = gr['Off_TO'].fillna(0)
+    gr['Team'] = team
+    gr['Year'] = year
+    gr[['month','day']] = gr.Date.str.split(expand=True)
+    gr['Timestamp_str'] = gr['Year'].str.cat(gr['month'], sep ="/").str.cat(gr['day'], sep ="/")
+    gr['Timestamp'] = pd.to_datetime(gr['Timestamp_str'], format="%Y/%B/%d")
+
+    gr['Win%']=gr['Record'].map(win_pct)
+    gr.index = pd.RangeIndex(len(gr.index))
+    gr.drop(columns=['Boxscore','Timestamp_str','month','day','Week','Day','Date'],inplace=True)
+    return gr
 
 #%%
 def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
@@ -104,29 +116,16 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
         gl = get_gamelog(team,year)
         gr = get_game_results(team,year)
         
-        wpct = gr[['Win%']]
-        gl.merge(wpct)
-        stats = stats.append(df)
+        gl['Win%'] = gr[['Win%']]
+        stats = stats.append(gl)
     
-    stats['Def_TO'] = stats['Def_TO'].fillna(0)
-    stats['Off_TO'] = stats['Off_TO'].fillna(0)
-    stats['Team'] = team
-
-    stats[['month', 'day']] = stats.Date.str.split(expand=True)
-    stats['Timestamp_str'] = stats['year'].str.cat(stats['month'], sep="/").str.cat(stats['day'], sep="/")
-    stats['Timestamp'] = pd.to_datetime(stats['Timestamp_str'], format="%Y/%B/%d")
-    
-    # drop columns
-    stats.drop(columns=['BoxScore','Timestamp_str','month','day','Date'],inplace=True)
-
     if timeindex:
         stats.set_index(stats['Timestamp'])
     else:
         stats.index = pd.RangeIndex(len(stats.index))
-        stats.index = range(len(stats.index))
 
     if to_csv:
-        filename = './stats/{team}_{start}_{stop}.csv'.format(team=team,start=years[0],stop=years[-1])
+        filename = './stats/combinedstats/{team}_{start}_{stop}.csv'.format(team=team,start=years[0],stop=years[-1])
         print('Saving '+team+' stats to '+ filename)
         stats.to_csv(filename,index=False)
 
@@ -169,8 +168,10 @@ if __name__ == "__main__":
     if args.end is None:
         args.end = int(date.today().year)
     if args.start is None:
-        args.start = args.end - 6
+        args.start = args.end - 5
     
     years = [str(i) for i in range(args.start,args.end + 1)]
     team_stats = get_teams_stats(years, args.to_csv,args.timeindex)
 
+
+# %%
