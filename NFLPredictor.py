@@ -32,11 +32,11 @@ def getMatchupData(team1='dal',
                    add_mean=True,
                    target_col='TeamScore',
                    covs=None):
-    t1stats = getTeamGameStats(team1, years)
-    t2stats = getTeamGameStats(team2, years)
+    t1data = getTeamGameStats(team1, years)
+    t2data = getTeamGameStats(team2, years)
 
-    t1_ts = get_ts_data(t1stats, add_mean, target_col)
-    t2_ts = get_ts_data(t2stats, add_mean, target_col)
+    t1_ts = get_ts_data(t1data, add_mean, target_col)
+    t2_ts = get_ts_data(t2data, add_mean, target_col)
 
     teams = t1_ts, t2_ts
     return teams
@@ -75,12 +75,11 @@ def getTeamGameStats(team='dal', years=['2018', '2019', '2020', '2021'], timesta
     return stats
 
 
-def get_ts_data(teamdata, add_mean=True, target_col='TeamScore', covs=None):
+def get_ts_data(t1data, add_mean=True, target_col='TeamScore'):
     # Split target and covariates
-    target = teamdata[target_col]
+    target = t1data[target_col]
 
-    if covs is None:
-        covs = teamdata[['Off_1stDn', 'Off_Totyd', 'Off_PassYd', 'Off_RushYd', 'TeamScore', 'OT', '@', 'Off_TO',
+    covs = t1data[['Off_1stDn', 'Off_Totyd', 'Off_PassYd', 'Off_RushYd', 'TeamScore', 'OT', '@', 'Off_TO',
                          'Def_1stDn', 'Def_Totyd', 'Def_PassYd', 'Def_RushYd', 'Def_TO']]
     covs = covs.astype(np.float32)
     covs = covs.drop(target_col, axis=1)
@@ -91,6 +90,8 @@ def get_ts_data(teamdata, add_mean=True, target_col='TeamScore', covs=None):
         covs = covs.append(mu, ignore_index=True)
         target.loc[len(target.index)] = target.mean(axis=0)
 
+    covs = covs.reset_index()
+    covs = covs.set_index('index')
     # Get TimeSeries
     target_ts = TimeSeries.from_series(target)
     covs_ts = TimeSeries.from_dataframe(covs)
@@ -103,7 +104,7 @@ def get_ts_data(teamdata, add_mean=True, target_col='TeamScore', covs=None):
         else:
             all_stats = covs_ts.stack(covs_ts[col])
 
-    ret = {"target": target_ts, "cov": all_stats, "team": teamdata['Team']}
+    ret = {"target": target_ts, "cov": all_stats, "team": t1data['Team']}
 
     return ret
 
@@ -444,7 +445,11 @@ if __name__ == "__main__":
         team1 = t[0]
         team2 = t[1]
         add_mean = True
-        t1data, t2data = getMatchupData(team1, team2, years, add_mean, target_col)
+        t1data = getTeamGameStats(team1, years)
+        t2data = getTeamGameStats(team2, years)
+
+        t1_ts = get_ts_data(t1data, add_mean, target_col)
+        t2_ts = get_ts_data(t2data, add_mean, target_col)
         train1, train2, cov1, cov2, scale1, scale2 = split_and_scale_data(t1data, t2data)
 
         # Plot

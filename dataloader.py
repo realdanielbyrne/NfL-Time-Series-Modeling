@@ -14,12 +14,12 @@ teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
          'sea', 'tam', 'oti', 'was']
 
-# team='dal'
-# timestamp_index=True
-# start=2018
-# stop=2022
-# to_csv=True
-# year = '2021'
+team='dal'
+timestamp_index=True
+start=2018
+stop=2022
+to_csv=True
+year = '2021'
 
 #%%
 def get_teams_stats(years, to_csv=True, timeindex = False):
@@ -102,10 +102,14 @@ def get_game_results(team,year):
     gr[['month','day']] = gr.Date.str.split(expand=True)
     gr['Timestamp_str'] = gr['Year'].str.cat(gr['month'], sep ="/").str.cat(gr['day'], sep ="/")
     gr['Timestamp'] = pd.to_datetime(gr['Timestamp_str'], format="%Y/%B/%d")
-
+    gr['month'] = gr['Timestamp'].dt.month
+    gr['year'] = gr['Timestamp'].dt.year
+    gr['Avg3Game'] = gr['TmScore'].rolling(3).mean()
+    gr['Avg6Game'] = gr['TmScore'].rolling(6).mean()
     gr['Win%']=gr['Record'].map(win_pct)
+    
     gr.index = pd.RangeIndex(len(gr.index))
-    gr.drop(columns=['Boxscore','Timestamp_str','month','day','Week','Day','Date'],inplace=True)
+    gr.drop(columns=['Boxscore','Timestamp_str','Date','day'],inplace=True)
     return gr
 
 #%%
@@ -114,9 +118,14 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     stats = pd.DataFrame()
     for year in years:
         gl = get_gamelog(team,year)
-        gr = get_game_results(team,year)
+        gl = gl[['PassCmp','PassAtt','PassYds','PassTd','PassInt','Sacks',
+                 'SackYds','PassY/A','Cmp%','Qbr','RushAtt','RushYds',
+                 'RushY/A','RushTd','FGM','FGA','XPM','XPA','Pnt','PntYds',
+                 '3DConv','3DAtt','4DConv','4DAtt','ToP','Timestamp']]
+        gr = get_game_results(team,year)     
+
         
-        gl['Win%'] = gr[['Win%']]
+        gl = pd.merge(gl,gr,on='Timestamp')
         stats = stats.append(gl)
     
     if timeindex:
@@ -138,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument('-b','--start',
                         action='store',
                         type=int,
-                        default=int(date.today().year)-5,
+                        default=int(date.today().year)-3,
                         required=False,
                         help="The first years stats are pulled from.")
 
@@ -168,7 +177,7 @@ if __name__ == "__main__":
     if args.end is None:
         args.end = int(date.today().year)
     if args.start is None:
-        args.start = args.end - 5
+        args.start = args.end - 4
     
     years = [str(i) for i in range(args.start,args.end + 1)]
     team_stats = get_teams_stats(years, args.to_csv,args.timeindex)
