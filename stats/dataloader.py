@@ -4,21 +4,23 @@ import numpy as np
 import requests
 from datetime import date
 import argparse
+import sys
 
 
 gamelog_url = 'https://www.pro-football-reference.com/teams/{team}/{year}/gamelog/'
 game_results_url = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
+
 
 teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
          'den', 'det', 'gnb', 'htx', 'clt', 'jax', 'kan', 'rai', 'sdg',
          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
          'sea', 'tam', 'oti', 'was']
 
-team='dal'
-timestamp_index=True
-start=2018
-stop=2022
-to_csv=True
+team = 'dal'
+timestamp_index = True
+start = 2018
+stop = 2022
+to_csv = True
 year = '2021'
 
 #%%
@@ -26,8 +28,14 @@ def get_teams_stats(years, to_csv=True, timeindex = False):
     
     team_stats = {}
     for team in teams:
-        stats = get_team_game_stats(team, years, to_csv, timeindex)
+        stats = get_team_game_stats(team, years, timeindex)
         team_stats[team] = stats.copy()
+        if to_csv:
+            filename = './combinedstats/{team}_{start}_{stop}.csv'.format(team=team,start=years[0],stop=years[-1])
+            print('Saving ' + team + ' stats to '+ filename)
+            stats.to_csv(filename,index=False)
+
+        
 
     return team_stats
 
@@ -46,7 +54,8 @@ def win_pct(c):
 #%%
 def get_gamelog(team,year):
     url = gamelog_url.format(team=team, year=str(year))
-    html = requests.get(url).content
+    print('gl:',url)  
+    html = requests.get(url).content         
     gl_list = pd.read_html(html)
     gl = gl_list[0].copy()
     gl.columns = ["_".join(a) for a in gl.columns.to_flat_index()]
@@ -70,7 +79,10 @@ def get_gamelog(team,year):
     gl['Timestamp'] = pd.to_datetime(gl['Timestamp_str'], format="%Y/%B/%d")
     gl.drop(columns=['Boxscore','Timestamp_str','month','day','Week','Day','Date'],inplace=True)
     gl.index = pd.RangeIndex(len(gl.index))
-    
+    gl = gl[['PassCmp','PassAtt','PassYds','PassTd','PassInt','Sacks',
+            'SackYds','PassY/A','Cmp%','Qbr','RushAtt','RushYds',
+            'RushY/A','RushTd','FGM','FGA','XPM','XPA','Pnt','PntYds',
+            '3DConv','3DAtt','4DConv','4DAtt','ToP','Timestamp']]
     return gl
 
 #%%
@@ -78,7 +90,10 @@ def get_game_results(team,year):
     # scrape data from pro-football reference
     url = game_results_url.format(team=team, year=year)
     html = requests.get(url).content
+
+    print('gr:',url)        
     gr_list = pd.read_html(html)
+
     gr = gr_list[1].copy()
     
     # flatten index and rename columns
@@ -118,27 +133,17 @@ def get_team_game_stats(team, years, to_csv=True, timeindex=False  ):
     stats = pd.DataFrame()
     for year in years:
         gl = get_gamelog(team,year)
-        gl = gl[['PassCmp','PassAtt','PassYds','PassTd','PassInt','Sacks',
-                 'SackYds','PassY/A','Cmp%','Qbr','RushAtt','RushYds',
-                 'RushY/A','RushTd','FGM','FGA','XPM','XPA','Pnt','PntYds',
-                 '3DConv','3DAtt','4DConv','4DAtt','ToP','Timestamp']]
-        gr = get_game_results(team,year)     
-
-        
-        gl = pd.merge(gl,gr,on='Timestamp')
-        stats = stats.append(gl)
+        gr = get_game_results(team,year)             
+        stats = stats.append(pd.merge(gl,gr,on='Timestamp'))
     
     if timeindex:
         stats.set_index(stats['Timestamp'])
     else:
         stats.index = pd.RangeIndex(len(stats.index))
 
-    if to_csv:
-        filename = './stats/combinedstats/{team}_{start}_{stop}.csv'.format(team=team,start=years[0],stop=years[-1])
-        print('Saving '+team+' stats to '+ filename)
-        stats.to_csv(filename,index=False)
 
     return stats
+
 
 #%%
 if __name__ == "__main__":
@@ -147,13 +152,13 @@ if __name__ == "__main__":
     parser.add_argument('-b','--start',
                         action='store',
                         type=int,
-                        default=int(date.today().year)-3,
+                        default=2018,
                         required=False,
                         help="The first years stats are pulled from.")
 
     parser.add_argument('-e','--end',
                         type=int,
-                        default=int(date.today().year),
+                        default=2021,
                         required=False,
                         help="The last year stats are pulled.")
 
@@ -172,15 +177,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args("")
 
-
-    # Get Data
-    if args.end is None:
-        args.end = int(date.today().year)
-    if args.start is None:
-        args.start = args.end - 4
-    
-    years = [str(i) for i in range(args.start,args.end + 1)]
+    years = [str(i) for i in range(args.start,args.end +1)]
     team_stats = get_teams_stats(years, args.to_csv,args.timeindex)
+
 
 
 # %%
