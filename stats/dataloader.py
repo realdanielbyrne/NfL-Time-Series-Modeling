@@ -11,11 +11,11 @@ gamelog_url = 'https://www.pro-football-reference.com/teams/{team}/{year}/gamelo
 game_results_url = 'https://www.pro-football-reference.com/teams/{team}/{year}.htm'
 
 
-teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
-         'den', 'det', 'gnb', 'htx', 'clt', 'jax', 'kan', 'rai', 'sdg',
-         'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
-         'sea', 'tam', 'oti', 'was']
-
+# teams = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal',
+#          'den', 'det', 'gnb', 'htx', 'clt', 'jax', 'kan', 'rai', 'sdg',
+#          'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
+#          'sea', 'tam', 'oti', 'was']
+teams = ['nyg']
 team = 'dal'
 timestamp_index = True
 start = 2018
