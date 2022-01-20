@@ -93,6 +93,25 @@ if __name__ == "__main__":
                         required=False,
                         help="Forecast horizon.")
     
+    parser.add_argument('-m','--models',
+                        type=int,
+                        default= [
+                            ("tbats",TBATS(
+                                use_box_cox=False,
+                                use_trend=True,
+                                use_damped_trend=False,
+                                use_arma_errors=True)),
+
+                            ("aarima",AutoARIMA(sp=12, d=0, max_p=4, max_q=2, suppress_warnings=True)),
+                            ("exp",ExponentialSmoothing(trend='add', seasonal='additive', sp=12)),
+                            ("poly",PolynomialTrendForecaster(degree=3)),
+                            ("trend",TrendForecaster()),
+                            ("autoETS",AutoETS())
+                        ],
+                        required=False,
+                        help="Forecast horizon.")
+    
+    
     args = parser.parse_args("")
 
     # teams
@@ -101,33 +120,21 @@ if __name__ == "__main__":
         'ram', 'mia', 'min', 'nwe', 'nor', 'nyj', 'phi', 'pit', 'sfo',
         'sea', 'tam', 'oti', 'was','nyg']
 
-    forecasters = [
-        ("tbats",TBATS(
-            use_box_cox=False,
-            use_trend=True,
-            use_damped_trend=False,
-            use_arma_errors=True)),
-
-        ("aarima",AutoARIMA(sp=12, d=0, max_p=4, max_q=2, suppress_warnings=True)),
-        ("exp",ExponentialSmoothing(trend='add', seasonal='additive', sp=12)),
-        ("poly",PolynomialTrendForecaster(degree=3)),
-        ("trend",TrendForecaster()),
-        ("autoETS",AutoETS())
-    ]
+    forecasters = args.models
     start = args.start
     end = args.end
-    fh = args.fh
-    
+    fh = args.fh    
     teamdata = read_data(teams, [start,end])
     
     
 # %%
+
     forecasts, models = get_forecasts(teamdata, forecasters, fh)
     forecasts
 
 
 # %%
-    forecasts = get_ensemble_forecasts(teamdata, forecasters, fh)
-    forecasts
+    ensembles = get_ensemble_forecasts(teamdata, forecasters, fh)
+    ensembles
 
 # %%
